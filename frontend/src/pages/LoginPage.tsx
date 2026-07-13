@@ -1,167 +1,110 @@
+/* /login — Modal spec §15 rendered as full page */
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, LogIn, BookOpen } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { authApi, type LoginPayload } from "../api/auth.api";
 import { useAuthStore } from "../store/authStore";
+import Button from "../components/Button";
+import { Eye, EyeOff } from "lucide-react";
 
 const LoginPage = () => {
   const [form, setForm] = useState<LoginPayload>({ email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const { setUser } = useAuthStore();
   const navigate = useNavigate();
 
-  const loginMutation = useMutation({
+  const mutation = useMutation({
     mutationFn: authApi.login,
-    onSuccess: (user) => {
-      setUser(user);
-      navigate("/dashboard");
-    },
-    onError: (err: any) => {
-      setError(err?.response?.data?.message ?? "Invalid credentials. Please try again.");
-    },
+    onSuccess: (user) => { setUser(user); navigate("/dashboard"); },
+    onError: (err: any) => setError(err?.response?.data?.message ?? "Invalid email or password."),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    loginMutation.mutate(form);
+    mutation.mutate(form);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      {/* Background orbs */}
-      <div
-        className="fixed top-1/4 left-1/3 w-96 h-96 rounded-full blur-3xl opacity-10 pointer-events-none"
-        style={{ background: "radial-gradient(circle, var(--color-primary), transparent)" }}
-      />
-
-      <div className="w-full max-w-md animate-fade-in">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 glow-sm"
-            style={{ background: "linear-gradient(135deg, var(--color-primary), #5b21b6)" }}
-          >
-            <BookOpen className="w-7 h-7 text-white" />
+    <div className="min-h-screen bg-bone flex items-center justify-center px-4">
+      <div className="w-full max-w-[400px]">
+        {/* Panel — matches modal spec §15 anatomy */}
+        <div className="bg-paper rounded-lg overflow-hidden shadow-modal">
+          <div className="px-[22px] py-[18px] border-b border-line">
+            <h1 className="font-display font-semibold text-[18px] text-ink">Log in</h1>
           </div>
-          <h1 className="text-3xl font-black mb-1" style={{ color: "var(--color-text)" }}>
-            Welcome back
-          </h1>
-          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-            Sign in to your AxiomLearn account
-          </p>
-        </div>
 
-        {/* Form Card */}
-        <div className="gradient-border p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Error Banner */}
+          <div className="p-[22px]">
             {error && (
-              <div
-                className="px-4 py-3 rounded-lg text-sm font-medium"
-                style={{ background: "rgba(239,68,68,0.1)", color: "var(--color-error)", border: "1px solid rgba(239,68,68,0.2)" }}
-              >
+              <div className="mb-4 px-3 py-[10px] rounded-sm bg-danger-tint text-danger text-[13px]">
                 {error}
               </div>
             )}
 
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="login-email"
-                className="block text-sm font-medium mb-2"
-                style={{ color: "var(--color-text-muted)" }}
-              >
-                Email address
-              </label>
-              <input
-                id="login-email"
-                type="email"
-                autoComplete="email"
-                required
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-xl text-sm input-glow transition-all duration-200"
-                style={{
-                  background: "var(--color-surface-2)",
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text)",
-                }}
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label
-                htmlFor="login-password"
-                className="block text-sm font-medium mb-2"
-                style={{ color: "var(--color-text-muted)" }}
-              >
-                Password
-              </label>
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="space-y-[14px]">
+              {/* Email field §15 */}
+              <div>
+                <label className="font-mono text-[11.5px] text-t3 block mb-[7px]">Email</label>
                 <input
-                  id="login-password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
+                  id="login-email"
+                  type="email"
+                  autoComplete="email"
                   required
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 pr-12 rounded-xl text-sm input-glow transition-all duration-200"
-                  style={{
-                    background: "var(--color-surface-2)",
-                    border: "1px solid var(--color-border)",
-                    color: "var(--color-text)",
-                  }}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder="you@example.com"
+                  className="w-full h-11 bg-paper-sunken border border-line rounded-sm px-3 text-[13.5px] text-ink font-body focus:outline-none focus:border-axiom transition-colors"
                 />
-                <button
-                  type="button"
-                  id="login-toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity duration-200 hover:opacity-70 cursor-pointer"
-                  style={{ color: "var(--color-text-dim)" }}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
               </div>
-            </div>
 
-            {/* Submit */}
-            <button
-              id="login-submit-btn"
-              type="submit"
-              disabled={loginMutation.isPending}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-2"
-              style={{ background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))" }}
-            >
-              {loginMutation.isPending ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <LogIn className="w-4 h-4" />
-                  Sign In
-                </>
-              )}
-            </button>
-          </form>
+              {/* Password field */}
+              <div>
+                <label className="font-mono text-[11.5px] text-t3 block mb-[7px]">Password</label>
+                <div className="relative">
+                  <input
+                    id="login-password"
+                    type={showPw ? "text" : "password"}
+                    autoComplete="current-password"
+                    required
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    placeholder="••••••••"
+                    className="w-full h-11 bg-paper-sunken border border-line rounded-sm px-3 pr-10 text-[13.5px] text-ink font-body focus:outline-none focus:border-axiom transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(!showPw)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-t3 hover:text-t2"
+                    tabIndex={-1}
+                  >
+                    {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                block
+                disabled={mutation.isPending}
+                id="login-submit-btn"
+              >
+                {mutation.isPending ? "Logging in…" : "Log in"}
+              </Button>
+            </form>
+
+            {/* Footer link — §15 centered 12.5px */}
+            <p className="text-[12.5px] text-t2 text-center mt-[14px]">
+              No account?{" "}
+              <Link to="/signup" className="text-axiom hover:underline" id="login-signup-link">
+                Sign up
+              </Link>
+            </p>
+          </div>
         </div>
-
-        {/* Footer link */}
-        <p className="text-center text-sm mt-6" style={{ color: "var(--color-text-muted)" }}>
-          Don't have an account?{" "}
-          <Link
-            to="/signup"
-            id="login-signup-link"
-            className="font-semibold hover:opacity-80 transition-opacity"
-            style={{ color: "var(--color-accent)" }}
-          >
-            Sign up for free
-          </Link>
-        </p>
       </div>
     </div>
   );

@@ -1,163 +1,139 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
-
 @theme {
-  --color-bg: #0a0a14;
-  --color-surface: #12121f;
-  --color-surface-2: #1a1a2e;
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-primary: #7c3aed;
-  --color-primary-hover: #6d28d9;
-  --color-primary-light: rgba(124, 58, 237, 0.15);
-  --color-accent: #a78bfa;
-  --color-accent-2: #c4b5fd;
-  --color-text: #f1f0ff;
-  --color-text-muted: #9ca3af;
-  --color-text-dim: #6b7280;
-  --color-success: #10b981;
-  --color-error: #ef4444;
-  --color-warning: #f59e0b;
+  /* ── SURFACE COLORS ── */
+  --color-bone:         #F0EEE6;
+  --color-paper:        #FFFFFF;
+  --color-paper-sunken: #E8E5DB;
+  --color-ink:          #14213D;
+  --color-ink-2:        #1E2C4F;
+  --color-ink-sunken:   #0F1930;
 
-  --font-sans: "Inter", sans-serif;
+  /* ── TEXT ── (shorthand matching the HTML reference: t2/t3/ti1/ti2/ti3) */
+  --color-t2:  #5B6472;
+  --color-t3:  #8B92A0;
+  --color-ti1: #F3F1EA;
+  --color-ti2: #A9B0C4;
+  --color-ti3: #6B7490;
 
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-2xl: 2rem;
+  /* ── LINES ── */
+  --color-line:     #DAD5C7;
+  --color-line-ink: #2B3A63;
+
+  /* ── ACCENT ── */
+  --color-axiom:         #2F5FDE;
+  --color-axiom-hover:   #2450C4;
+  --color-axiom-tint:    #E3E9FB;
+  --color-axiom-tint-ink:#223462;
+  --color-proof:         #E8623F;
+  --color-proof-hover:   #D5502E;
+  --color-proof-tint:    #FBE7DF;
+  --color-gold:          #C89B3C;
+  --color-success:       #1F8B6E;
+  --color-success-tint:  #DFF1EA;
+  --color-danger:        #C43D3D;
+  --color-danger-tint:   #FBE2E2;
+
+  /* ── DOMAIN COLORS (course surfaces only — never chrome) ── */
+  --color-d-code:     #2F5FDE;
+  --color-d-design:   #A25FD1;
+  --color-d-business: #1F8B6E;
+  --color-d-data:     #1D8FA6;
+  --color-d-language: #D1436A;
+  --color-d-creative: #C89B3C;
+
+  /* ── TYPOGRAPHY ── */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'Inter', -apple-system, sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+
+  /* ── BORDER RADIUS (overrides Tailwind defaults per spec) ── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-pill: 999px;
+
+  /* ── SHADOWS ── */
+  --shadow-card:   0 1px 2px rgba(20,33,61,.04), 0 8px 24px -8px rgba(20,33,61,.12);
+  --shadow-raised: 0 4px 10px rgba(20,33,61,.06), 0 16px 40px -12px rgba(20,33,61,.18);
+  --shadow-modal:  0 30px 60px -20px rgba(20,33,61,.35);
+
+  /* ── MOTION ── */
+  --ease-standard: cubic-bezier(.4, 0, .2, 1);
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* ── GLOBAL RESET ── */
+*, *::before, *::after { box-sizing: border-box; }
 
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
 body {
-  font-family: var(--font-sans);
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  min-height: 100vh;
+  font-family: var(--font-body);
+  background-color: var(--color-bone);
+  color: var(--color-ink);
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--color-surface);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--color-primary);
-  border-radius: 3px;
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+img { max-width: 100%; display: block; }
+
+:focus-visible {
+  outline: 2px solid var(--color-axiom);
+  outline-offset: 2px;
 }
 
-/* Glass utility */
-.glass {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--color-border);
-}
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-paper-sunken); }
+::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 3px; }
 
-/* Gradient text */
-.gradient-text {
-  background: linear-gradient(135deg, #a78bfa, #7c3aed, #c4b5fd);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* ── DOMAIN THUMBNAIL GRADIENTS ── */
+.thumb-code     { background: linear-gradient(135deg, var(--color-d-code),     #5C86EE); }
+.thumb-design   { background: linear-gradient(135deg, var(--color-d-design),   #C79BE8); }
+.thumb-business { background: linear-gradient(135deg, var(--color-d-business), #3FAE8C); }
+.thumb-data     { background: linear-gradient(135deg, var(--color-d-data),     #3FB4CC); }
+.thumb-language { background: linear-gradient(135deg, var(--color-d-language), #E27A97); }
+.thumb-creative { background: linear-gradient(135deg, var(--color-d-creative), #DFB868); }
 
-/* Glow effects */
-.glow-primary {
-  box-shadow: 0 0 40px rgba(124, 58, 237, 0.3);
-}
-
-.glow-sm {
-  box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-24px); }
-  to   { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.3); }
-  50%       { box-shadow: 0 0 40px rgba(124, 58, 237, 0.6); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-10px); }
-}
-
-@keyframes spin-slow {
-  to { transform: rotate(360deg); }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease forwards;
-}
-
-.animate-slide-left {
-  animation: slideInLeft 0.5s ease forwards;
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-.animate-spin-slow {
-  animation: spin-slow 8s linear infinite;
-}
-
-/* Stagger children */
-.stagger-children > *:nth-child(1) { animation-delay: 0.05s; }
-.stagger-children > *:nth-child(2) { animation-delay: 0.1s; }
-.stagger-children > *:nth-child(3) { animation-delay: 0.15s; }
-.stagger-children > *:nth-child(4) { animation-delay: 0.2s; }
-.stagger-children > *:nth-child(5) { animation-delay: 0.25s; }
-.stagger-children > *:nth-child(6) { animation-delay: 0.3s; }
-
-/* Input focus glow */
-.input-glow:focus {
-  outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
-}
-
-/* Gradient border */
-.gradient-border {
+/* ── AXIOM PANEL CONNECTOR LINE ── */
+.ap-node {
   position: relative;
-  background: var(--color-surface);
-  border-radius: var(--radius-xl);
+  padding-bottom: 26px;
 }
-.gradient-border::before {
-  content: "";
+.ap-node:last-child { padding-bottom: 0; }
+.ap-node::before {
+  content: '';
   position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(124,58,237,0.6), rgba(167,139,250,0.2), rgba(124,58,237,0.6));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  left: 15px;
+  top: 34px;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-line);
 }
+.ap-node:last-child::before { display: none; }
+
+/* ── PROGRESS BAR ── */
+.progress-track {
+  height: 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-paper-sunken);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--color-axiom);
+  transition: width var(--duration-base) var(--ease-standard);
+}
+.progress-fill.complete { background: var(--color-success); }
+
+/* ── CURRICULUM ACCORDION CHEVRON ── */
+.chevron-icon {
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+details[open] .chevron-icon { transform: rotate(90deg); }

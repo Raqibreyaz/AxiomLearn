@@ -1,188 +1,72 @@
-import { Link } from "react-router-dom";
-import { BookOpen, PlusCircle, Mail, Shield } from "lucide-react";
-import { useAuthStore } from "../store/authStore";
-import { useCourses } from "../hooks/useCourses";
-import CourseCard from "../components/CourseCard";
-import LoadingSpinner from "../components/LoadingSpinner";
+/* /dashboard — Student dashboard
+   Spec: Sidebar §10, DashHead, KPI row §11, ProgressCards §12 */
 
-const roleBadgeColor: Record<string, string> = {
-  owner: "#f59e0b",
-  admin: "#ef4444",
-  instructor: "#7c3aed",
-  student: "#10b981",
-};
+import { useNavigate } from "react-router-dom";
+import { useCourses } from "../hooks/useCourses";
+import { useAuthStore } from "../store/authStore";
+import DashboardSidebar from "../components/DashboardSidebar";
+import KpiCard from "../components/KpiCard";
+import SectionHeader from "../components/SectionHeader";
+import Button from "../components/Button";
 
 const DashboardPage = () => {
   const { user } = useAuthStore();
-  const isInstructor = user?.role === "instructor" || user?.role === "admin" || user?.role === "owner";
-
-  const { data: courses, isLoading } = useCourses();
+  const navigate = useNavigate();
+  const { data: courses = [] } = useCourses();
 
   if (!user) return null;
+  const firstName = user.name.split(" ")[0];
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Welcome Header */}
-        <div className="mb-10 animate-fade-in">
-          <p className="text-sm font-medium uppercase tracking-widest mb-2" style={{ color: "var(--color-accent)" }}>
-            Dashboard
-          </p>
-          <h1 className="text-4xl font-black mb-2" style={{ color: "var(--color-text)" }}>
-            Welcome back, {user.name.split(" ")[0]} 👋
-          </h1>
-          <p className="text-base" style={{ color: "var(--color-text-muted)" }}>
-            Here's what's happening on your account.
-          </p>
+    <div className="flex max-[920px]:flex-col min-h-[calc(100vh-64px)]">
+      <DashboardSidebar variant="student" />
+
+      <main className="flex-1 px-9 py-8 max-[920px]:px-4 max-[920px]:py-5">
+        {/* Dash head */}
+        <div className="flex justify-between items-start flex-wrap gap-[14px] mb-7">
+          <div>
+            <h1 className="font-display font-semibold text-[26px] text-ink">Welcome back, {firstName}</h1>
+            <p className="text-t2 text-[13.5px] mt-[5px]">Keep your streak going — one lesson a day adds up fast.</p>
+          </div>
+          <Button variant="primary" size="md" onClick={() => navigate("/courses")} id="dash-browse-btn">
+            Browse courses →
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10">
-          {/* Profile Card */}
-          <div className="lg:col-span-1 glass rounded-2xl p-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-            <div className="flex flex-col items-center text-center">
-              <div
-                className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black mb-4"
-                style={{
-                  background: "linear-gradient(135deg, var(--color-primary), #5b21b6)",
-                  color: "white",
-                }}
-              >
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <h2 className="text-lg font-bold mb-1" style={{ color: "var(--color-text)" }}>
-                {user.name}
-              </h2>
-              <span
-                className="text-xs font-semibold px-3 py-1 rounded-full capitalize mb-4"
-                style={{
-                  background: `${roleBadgeColor[user.role]}20`,
-                  color: roleBadgeColor[user.role],
-                  border: `1px solid ${roleBadgeColor[user.role]}40`,
-                }}
-              >
-                {user.role}
-              </span>
-              <div className="w-full space-y-2.5">
-                <div className="flex items-center gap-2.5 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                  <Mail className="w-4 h-4 shrink-0" />
-                  <span className="truncate">{user.email}</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-sm" style={{ color: "var(--color-text-muted)" }}>
-                  <Shield className="w-4 h-4 shrink-0" />
-                  <span className="capitalize">{user.role} access</span>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* KPI row §11 — 4 across desktop */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+          <KpiCard label="Enrolled courses"   value="0"   delta="Enroll in a course to start" deltaDir="flat" />
+          <KpiCard label="Hours learned"      value="0h"  delta="Track as you watch"           deltaDir="flat" />
+          <KpiCard label="Lessons completed"  value="0"   delta="—"                            deltaDir="flat" />
+          <KpiCard label="Certificates"       value="0"   delta="Complete a course"             deltaDir="flat" />
+        </div>
 
-          {/* Stats / Actions */}
-          <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Stat: Courses Available */}
-            <div
-              className="glass rounded-2xl p-6 animate-fade-in"
-              style={{ animationDelay: "0.15s" }}
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: "var(--color-primary-light)" }}
-                >
-                  <BookOpen className="w-5 h-5" style={{ color: "var(--color-accent)" }} />
-                </div>
-              </div>
-              <p className="text-3xl font-black mb-1" style={{ color: "var(--color-text)" }}>
-                {isLoading ? "—" : courses?.length ?? 0}
-              </p>
-              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                Courses Available
-              </p>
-            </div>
+        {/* Continue learning §12 */}
+        <SectionHeader eyebrow="your progress" heading="Continue learning" />
 
-            {/* Quick Action */}
-            {isInstructor ? (
-              <Link
-                to="/instructor/create-course"
-                id="dashboard-create-course-link"
-                className="glass rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 group animate-fade-in"
-                style={{ animationDelay: "0.2s" }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 transition-colors duration-200"
-                  style={{ background: "var(--color-primary-light)" }}
-                >
-                  <PlusCircle className="w-5 h-5" style={{ color: "var(--color-accent)" }} />
-                </div>
-                <div>
-                  <p className="text-lg font-bold mb-1" style={{ color: "var(--color-text)" }}>
-                    Create a Course
-                  </p>
-                  <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                    Share your expertise with learners worldwide.
-                  </p>
-                </div>
-              </Link>
-            ) : (
-              <Link
-                to="/courses"
-                id="dashboard-browse-link"
-                className="glass rounded-2xl p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 animate-fade-in"
-                style={{ animationDelay: "0.2s" }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                  style={{ background: "var(--color-primary-light)" }}
-                >
-                  <BookOpen className="w-5 h-5" style={{ color: "var(--color-accent)" }} />
-                </div>
-                <div>
-                  <p className="text-lg font-bold mb-1" style={{ color: "var(--color-text)" }}>
-                    Browse Courses
-                  </p>
-                  <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-                    Discover new skills and expand your knowledge.
-                  </p>
-                </div>
-              </Link>
-            )}
+        <div className="max-w-2xl">
+          {/* Empty state until enrollment is implemented */}
+          <div className="bg-paper border border-line rounded-md p-8 text-center">
+            <p className="font-display text-[20px] font-semibold text-ink mb-2">No courses yet</p>
+            <p className="text-t2 text-[13.5px] mb-5">
+              Enroll in a course to start tracking your progress here.
+            </p>
+            <Button variant="primary" size="md" onClick={() => navigate("/courses")} id="dash-enroll-btn">
+              Browse courses
+            </Button>
           </div>
         </div>
 
-        {/* Latest Courses */}
-        <div className="animate-fade-in" style={{ animationDelay: "0.25s" }}>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold" style={{ color: "var(--color-text)" }}>
-              Latest Courses
-            </h2>
-            <Link
-              to="/courses"
-              id="dashboard-view-all-link"
-              className="text-sm font-medium transition-opacity duration-200 hover:opacity-70"
-              style={{ color: "var(--color-accent)" }}
-            >
-              View all →
-            </Link>
+        {/* Available courses teaser */}
+        {courses.length > 0 && (
+          <div className="mt-10">
+            <SectionHeader eyebrow="explore" heading="Available to learn" seeAllTo="/courses" />
+            <p className="text-t2 text-[13.5px]">
+              {courses.length} course{courses.length !== 1 ? "s" : ""} available — find your next subject.
+            </p>
           </div>
-
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <LoadingSpinner size="lg" />
-            </div>
-          ) : courses && courses.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 stagger-children">
-              {courses.slice(0, 8).map((course) => (
-                <CourseCard key={course._id} course={course} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 glass rounded-2xl">
-              <BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" style={{ color: "var(--color-accent)" }} />
-              <p className="font-medium" style={{ color: "var(--color-text-muted)" }}>
-                No courses available yet.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+        )}
+      </main>
     </div>
   );
 };

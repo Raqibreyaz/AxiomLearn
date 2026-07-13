@@ -1,117 +1,86 @@
+/* /courses — paginated/filterable course catalogue
+   Spec: Header §1 (in layout), SearchBar §4, CategoryChips §5, CourseCard grid §6 */
+
 import { useState } from "react";
-import { Search, BookOpen, SlidersHorizontal } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { useCourses } from "../hooks/useCourses";
+import SearchBar from "../components/SearchBar";
+import CategoryChips, { type Domain } from "../components/CategoryChips";
 import CourseCard from "../components/CourseCard";
-import LoadingSpinner from "../components/LoadingSpinner";
+import SectionHeader from "../components/SectionHeader";
+import Footer from "../components/Footer";
 
 const CoursesPage = () => {
-  const [searchInput, setSearchInput] = useState("");
-  const [appliedSearch, setAppliedSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeDomain, setActiveDomain] = useState<Domain>("All");
+  const searchQuery = searchParams.get("search") ?? "";
 
-  const { data: courses, isLoading, isError } = useCourses(appliedSearch || undefined);
+  const { data: courses = [], isLoading, isError } = useCourses(searchQuery || undefined);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setAppliedSearch(searchInput);
+  const filtered = courses.filter((c) => {
+    if (activeDomain === "All") return true;
+    return (c as any).domain?.toUpperCase() === activeDomain.toUpperCase();
+  });
+
+  const handleSearch = (q: string) => {
+    setSearchParams(q ? { search: q } : {});
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-10 animate-fade-in">
-          <div className="flex items-center gap-2 mb-3">
-            <SlidersHorizontal className="w-5 h-5" style={{ color: "var(--color-accent)" }} />
-            <span className="text-sm font-medium uppercase tracking-widest" style={{ color: "var(--color-accent)" }}>
-              Catalogue
-            </span>
-          </div>
-          <h1 className="text-4xl font-black mb-3" style={{ color: "var(--color-text)" }}>
-            All Courses
-          </h1>
-          <p className="text-lg" style={{ color: "var(--color-text-muted)" }}>
-            Discover expert-led courses across every discipline.
-          </p>
+    <div>
+      <div className="max-w-[1200px] mx-auto px-6 py-[72px]">
+        <SectionHeader
+          eyebrow="full catalogue"
+          heading="All courses"
+        />
+
+        {/* Search bar §4 */}
+        <div className="mb-8">
+          <SearchBar initialValue={searchQuery} onSearch={handleSearch} />
         </div>
 
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="mb-10 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          <div className="flex gap-3 max-w-xl">
-            <div className="relative flex-1">
-              <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 pointer-events-none"
-                style={{ color: "var(--color-text-dim)" }}
-              />
-              <input
-                id="courses-search-input"
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Search courses..."
-                className="w-full pl-12 pr-4 py-3 rounded-xl text-sm glass input-glow transition-all duration-200"
-                style={{
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text)",
-                  background: "transparent",
-                }}
-              />
-            </div>
-            <button
-              id="courses-search-btn"
-              type="submit"
-              className="px-6 py-3 rounded-xl font-semibold text-sm text-white transition-all duration-200 hover:opacity-90 hover:scale-105 cursor-pointer"
-              style={{ background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))" }}
-            >
-              Search
-            </button>
-          </div>
-        </form>
+        {/* Category chips §5 */}
+        <div className="mb-8">
+          <CategoryChips active={activeDomain} onChange={setActiveDomain} />
+        </div>
 
-        {/* Results */}
+        {/* Results count */}
+        {!isLoading && (
+          <p className="font-mono text-[11.5px] text-t3 mb-5">
+            {filtered.length} course{filtered.length !== 1 ? "s" : ""}
+            {searchQuery && ` matching "${searchQuery}"`}
+            {activeDomain !== "All" && ` in ${activeDomain}`}
+          </p>
+        )}
+
+        {/* Grid */}
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <LoadingSpinner size="lg" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-paper border border-line rounded-md h-[260px] animate-pulse" />
+            ))}
           </div>
         ) : isError ? (
-          <div className="text-center py-20">
-            <p className="text-lg font-semibold mb-2" style={{ color: "var(--color-error)" }}>
-              Failed to load courses
-            </p>
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-              Please check your connection and try again.
-            </p>
+          <div className="text-center py-16">
+            <p className="text-[17px] font-semibold text-ink mb-2">Failed to load courses</p>
+            <p className="text-t2">Please check your connection and try again.</p>
           </div>
-        ) : courses && courses.length > 0 ? (
-          <>
-            <p className="text-sm mb-6" style={{ color: "var(--color-text-dim)" }}>
-              {courses.length} course{courses.length !== 1 ? "s" : ""} found
-              {appliedSearch && ` for "${appliedSearch}"`}
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 stagger-children">
-              {courses.map((course) => (
-                <CourseCard key={course._id} course={course} />
-              ))}
-            </div>
-          </>
+        ) : filtered.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {filtered.map((course) => (
+              <CourseCard key={course._id} course={course} />
+            ))}
+          </div>
         ) : (
-          <div className="text-center py-24">
-            <div
-              className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-5"
-              style={{ background: "var(--color-primary-light)" }}
-            >
-              <BookOpen className="w-10 h-10" style={{ color: "var(--color-accent)" }} />
-            </div>
-            <h3 className="text-xl font-bold mb-2" style={{ color: "var(--color-text)" }}>
-              No courses found
-            </h3>
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-              {appliedSearch
-                ? `No courses match "${appliedSearch}". Try a different search.`
-                : "No courses available yet. Check back soon!"}
+          <div className="text-center py-20">
+            <p className="font-display text-[22px] font-semibold text-ink mb-2">No courses found</p>
+            <p className="text-t2">
+              {searchQuery ? `Try a different search term.` : "Check back soon — new courses are added weekly."}
             </p>
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 };

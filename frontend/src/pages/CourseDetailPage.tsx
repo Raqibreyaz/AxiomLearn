@@ -1,166 +1,230 @@
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, BookOpen, Calendar, Edit, User } from "lucide-react";
+/* /courses/[slug] or /courses/:id
+   Spec: CourseHero, PlayerCard + BuyBox §8, CurriculumAccordion §9, IncludesBox */
+
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useCourse } from "../hooks/useCourses";
 import { useAuthStore } from "../store/authStore";
+import Button from "../components/Button";
+import CurriculumAccordion, { type CurriculumSection } from "../components/CurriculumAccordion";
+import Footer from "../components/Footer";
 import LoadingSpinner from "../components/LoadingSpinner";
+
+/* Mock curriculum for courses without lesson data from backend */
+const getMockCurriculum = (title: string): CurriculumSection[] => [
+  {
+    title: "Axiom 01 · Discover — the core idea",
+    lessons: [
+      { id: "l1", title: `Why this matters in ${title.split(" ")[0].toLowerCase()}`, durationSec: 372, isFreePreview: true },
+      { id: "l2", title: "The foundational concept, clearly explained", durationSec: 460, isFreePreview: true },
+      { id: "l3", title: "Common misconceptions and how to avoid them", durationSec: 545, isLocked: true },
+    ],
+  },
+  {
+    title: "Axiom 02 · Practice — guided application",
+    lessons: [
+      { id: "l4", title: "Working through a real-world example", durationSec: 422, isFreePreview: true },
+      { id: "l5", title: "Building on feedback", durationSec: 870, isLocked: true },
+      { id: "l6", title: "Common patterns you'll use repeatedly", durationSec: 654, isLocked: true },
+    ],
+  },
+  {
+    title: "Axiom 03 · Prove it — your own project",
+    lessons: [
+      { id: "l7", title: "Project brief and deliverables", durationSec: 300, isLocked: true },
+      { id: "l8", title: "Building end-to-end", durationSec: 1124, isLocked: true },
+      { id: "l9", title: "Review and iteration", durationSec: 686, isLocked: true },
+    ],
+  },
+];
+
+const domainConfig: Record<string, { thumbClass: string; glyph: string }> = {
+  CODE:     { thumbClass: "thumb-code",     glyph: "◈" },
+  DESIGN:   { thumbClass: "thumb-design",   glyph: "◐" },
+  BUSINESS: { thumbClass: "thumb-business", glyph: "◆" },
+  DATA:     { thumbClass: "thumb-data",     glyph: "◉" },
+  LANGUAGE: { thumbClass: "thumb-language", glyph: "✎" },
+  CREATIVE: { thumbClass: "thumb-creative", glyph: "◬" },
+};
 
 const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const { data: course, isLoading, isError } = useCourse(id!);
 
-  const canEdit =
-    user &&
-    course &&
-    (user._id === (course.instructor as any)?._id ||
-      user.role === "admin" ||
-      user.role === "owner");
+  const isInstructor = user && (user.role === "instructor" || user.role === "admin" || user.role === "owner");
+  const canEdit = isInstructor && course && (user._id === (course.instructor as any)?._id || user.role === "admin" || user.role === "owner");
 
   if (isLoading) return <LoadingSpinner fullScreen />;
-
   if (isError || !course) {
     return (
-      <div className="min-h-screen pt-24 flex items-center justify-center">
+      <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-3" style={{ color: "var(--color-text)" }}>
-            Course Not Found
-          </h2>
-          <p className="mb-6" style={{ color: "var(--color-text-muted)" }}>
-            The course you're looking for doesn't exist.
-          </p>
-          <Link
-            to="/courses"
-            className="px-6 py-3 rounded-xl font-semibold text-white"
-            style={{ background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))" }}
-          >
-            Back to Courses
-          </Link>
+          <h2 className="font-display text-[28px] font-semibold text-ink mb-3">Course not found</h2>
+          <Button variant="primary" onClick={() => navigate("/courses")}>Browse courses</Button>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen pt-24 pb-16 px-4">
-      <div className="max-w-5xl mx-auto">
-        {/* Back button */}
-        <Link
-          to="/courses"
-          id="course-detail-back-btn"
-          className="inline-flex items-center gap-2 mb-8 text-sm font-medium transition-colors duration-200 hover:opacity-70"
-          style={{ color: "var(--color-text-muted)" }}
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Courses
-        </Link>
+  const domain = domainConfig[(course as any).domain?.toUpperCase()] ?? domainConfig.CODE;
+  const price = (course as any).price ?? 499;
+  const originalPrice = (course as any).originalPrice;
+  const curriculum = getMockCurriculum(course.title);
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            {/* Thumbnail */}
-            <div
-              className="w-full h-64 sm:h-80 rounded-2xl overflow-hidden mb-8"
-              style={{ background: "var(--color-surface-2)" }}
-            >
-              {course.thumbnail ? (
-                <img
-                  src={course.thumbnail}
-                  alt={course.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <BookOpen className="w-16 h-16 opacity-20" style={{ color: "var(--color-accent)" }} />
+  return (
+    <div>
+      {/* ── Course Hero ── bg paper, border-bottom */}
+      <div className="bg-paper border-b border-line py-11">
+        <div className="max-w-[1200px] mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_0.9fr] gap-11 items-start">
+
+            {/* Left: course info */}
+            <div>
+              {/* Breadcrumb */}
+              <div className="font-mono text-[12px] text-t3 mb-[18px]">
+                ~/courses/<b className="text-axiom font-medium">{(course as any).slug ?? id}</b>
+              </div>
+
+              <h1 className="font-display font-semibold text-[34px] leading-[1.15] text-ink mb-[14px]">
+                {course.title}
+              </h1>
+
+              <p className="text-t2 text-[15px] leading-relaxed mb-5 max-w-[560px]">
+                {course.description}
+              </p>
+
+              {/* Instructor row */}
+              <div className="flex items-center gap-[10px] mb-5">
+                <div className="w-[30px] h-[30px] rounded-pill bg-gradient-to-br from-axiom to-d-design flex items-center justify-center text-white text-sm font-semibold shrink-0">
+                  {(course.instructor as any)?.name?.charAt(0) ?? "I"}
                 </div>
-              )}
+                <span className="text-[13.5px] text-t2">
+                  Created by <b className="text-ink">{(course.instructor as any)?.name ?? "Instructor"}</b>
+                </span>
+              </div>
+
+              {/* Badge row */}
+              <div className="flex gap-[10px] flex-wrap">
+                {[
+                  "★ 4.8 (—)",
+                  `${curriculum.reduce((a, s) => a + s.lessons.length, 0)} lessons total`,
+                  "English",
+                ].map((badge) => (
+                  <span key={badge} className="font-mono text-[11.5px] text-t2 border border-line px-[10px] py-[5px] rounded-sm">
+                    {badge}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            {/* Title & Description */}
-            <h1 className="text-3xl sm:text-4xl font-black mb-4 leading-tight" style={{ color: "var(--color-text)" }}>
-              {course.title}
-            </h1>
-            <p className="text-base leading-relaxed mb-8" style={{ color: "var(--color-text-muted)" }}>
-              {course.description}
-            </p>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-4">
-            {/* Course Card */}
-            <div className="glass rounded-2xl p-6">
-              <h3 className="font-bold text-lg mb-5" style={{ color: "var(--color-text)" }}>
-                Course Info
-              </h3>
-
-              <div className="space-y-4">
-                {/* Instructor */}
-                <div className="flex items-start gap-3">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "var(--color-primary-light)" }}
-                  >
-                    <User className="w-4 h-4" style={{ color: "var(--color-accent)" }} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium mb-0.5" style={{ color: "var(--color-text-dim)" }}>
-                      Instructor
-                    </p>
-                    <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
-                      {course.instructor?.name ?? "Unknown"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Date */}
-                <div className="flex items-start gap-3">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "var(--color-primary-light)" }}
-                  >
-                    <Calendar className="w-4 h-4" style={{ color: "var(--color-accent)" }} />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium mb-0.5" style={{ color: "var(--color-text-dim)" }}>
-                      Created
-                    </p>
-                    <p className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>
-                      {new Date(course.createdAt).toLocaleDateString("en-US", {
-                        month: "long",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
+            {/* Right: Player card + Buy Box §8 */}
+            <div className="bg-paper border border-line rounded-lg overflow-hidden shadow-card">
+              {/* Player */}
+              <div className={`${domain.thumbClass} aspect-video flex items-center justify-center relative`}>
+                <span className="absolute top-3 left-3 font-mono text-[11px] bg-black/50 text-white px-[9px] py-1 rounded-sm">
+                  ▶ Trailer · 1:32
+                </span>
+                <div className="w-14 h-14 rounded-pill bg-axiom flex items-center justify-center text-white text-[18px]">
+                  ▶
                 </div>
               </div>
 
-              {/* Edit Button */}
-              {canEdit && (
-                <Link
-                  to={`/instructor/courses/${course._id}/edit`}
-                  id="course-detail-edit-btn"
-                  className="mt-6 flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm text-white transition-all duration-200 hover:opacity-90"
-                  style={{ background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))" }}
-                >
-                  <Edit className="w-4 h-4" />
-                  Edit Course
-                </Link>
-              )}
+              {/* Buy box */}
+              <div className="p-[22px]">
+                {/* Price row */}
+                <div className="flex items-baseline gap-[10px] mb-1">
+                  <span className="font-display font-semibold text-[30px] text-ink">₹{price.toLocaleString()}</span>
+                  {originalPrice && (
+                    <span className="font-mono text-[14px] text-t3 line-through">₹{originalPrice.toLocaleString()}</span>
+                  )}
+                </div>
 
-              {!user && (
-                <Link
-                  to="/signup"
-                  id="course-detail-enroll-btn"
-                  className="mt-6 flex items-center justify-center gap-2 w-full py-3 rounded-xl font-semibold text-sm text-white transition-all duration-200 hover:opacity-90 glow-sm"
-                  style={{ background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))" }}
-                >
-                  Enroll Now — Free
-                </Link>
-              )}
+                {/* Urgency — only rendered with real condition */}
+                {originalPrice && (
+                  <div className="font-mono text-[11.5px] text-proof mb-[18px]">
+                    {Math.round((1 - price / originalPrice) * 100)}% off
+                  </div>
+                )}
+
+                {/* CTAs */}
+                {user ? (
+                  <Button variant="proof" size="lg" block className="mb-2" id="enroll-btn">
+                    Enroll now
+                  </Button>
+                ) : (
+                  <Button variant="proof" size="lg" block className="mb-2" onClick={() => navigate("/signup")} id="enroll-btn">
+                    Sign up to enroll
+                  </Button>
+                )}
+                <Button variant="ghost" size="lg" block id="wishlist-btn">
+                  Add to wishlist
+                </Button>
+
+                {/* Includes checklist */}
+                <ul className="mt-[18px] space-y-[10px]">
+                  {[
+                    `${curriculum.reduce((a, s) => a + s.lessons.length, 0)} on-demand video lessons`,
+                    "Progress tracking & resume playback",
+                    "Certificate of completion",
+                    "Full lifetime access",
+                  ].map((item) => (
+                    <li key={item} className="flex items-center gap-[9px] text-[13.5px] text-t2">
+                      <span className="text-axiom">✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+
+                {canEdit && (
+                  <Link
+                    to={`/instructor/courses/${course._id}/edit`}
+                    className="mt-4 block text-center font-mono text-[12px] text-axiom hover:underline"
+                  >
+                    Edit this course →
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ── Curriculum + What you'll build ── */}
+      <div className="max-w-[1200px] mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_0.9fr] gap-11 items-start">
+          {/* Curriculum §9 */}
+          <div>
+            <h2 className="font-display font-semibold text-[22px] text-ink mb-[6px]">Curriculum</h2>
+            <p className="font-mono text-[12px] text-t3 mb-[18px]">
+              {curriculum.length} sections · {curriculum.reduce((a, s) => a + s.lessons.length, 0)} lessons
+            </p>
+            <CurriculumAccordion sections={curriculum} />
+          </div>
+
+          {/* What you'll build + Requirements */}
+          <div>
+            <h2 className="font-display font-semibold text-[22px] text-ink mb-[14px]">What you'll build</h2>
+            <div className="bg-paper border border-line rounded-md p-[18px] mb-[22px]">
+              <ul className="space-y-[11px]">
+                {[
+                  `${domain.glyph} A documented project from ${course.title.split(" ")[0].toLowerCase()} principles`,
+                  "◆ A portfolio-ready deliverable",
+                  "✎ A short case study you can share",
+                ].map((item) => (
+                  <li key={item} className="text-[13.5px] text-t2">{item}</li>
+                ))}
+              </ul>
+            </div>
+            <h2 className="font-display font-semibold text-[22px] text-ink mb-[10px]">Requirements</h2>
+            <p className="text-[13.5px] text-t2 leading-[1.8]">
+              No prior background required. Bring curiosity and willingness to practice.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
     </div>
   );
 };

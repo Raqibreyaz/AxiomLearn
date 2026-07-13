@@ -1,98 +1,82 @@
+/* Spec §6 — Course Card
+   Thumbnail (150px, domain-color gradient, domain tag + centered glyph) →
+   title → meta row (rating + reviews) → footer (price + lesson count).
+   Domain tag: NOT a file extension. Icon: domain-generic, never a language logo. */
+
 import { Link } from "react-router-dom";
-import { BookOpen, User, Clock } from "lucide-react";
 import type { Course } from "../api/courses.api";
+
+/* Domain config — glyph is a generic unicode symbol, never a tech logo */
+const domainConfig: Record<string, { thumbClass: string; glyph: string; label: string }> = {
+  CODE:     { thumbClass: "thumb-code",     glyph: "◈", label: "Code"     },
+  DESIGN:   { thumbClass: "thumb-design",   glyph: "◐", label: "Design"   },
+  BUSINESS: { thumbClass: "thumb-business", glyph: "◆", label: "Business" },
+  DATA:     { thumbClass: "thumb-data",     glyph: "◉", label: "Data"     },
+  LANGUAGE: { thumbClass: "thumb-language", glyph: "✎", label: "Language" },
+  CREATIVE: { thumbClass: "thumb-creative", glyph: "◬", label: "Creative" },
+};
+
+/* Fallback for courses without domain (e.g. from old MongoDB backend) */
+const fallbackDomain = { thumbClass: "thumb-code", glyph: "◈", label: "Course" };
 
 interface CourseCardProps {
   course: Course;
 }
 
 const CourseCard = ({ course }: CourseCardProps) => {
-  const formattedDate = new Date(course.createdAt).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const domain = domainConfig[(course as any).domain?.toUpperCase?.()] ?? fallbackDomain;
+
+  /* Format price: backend stores in rupees as number or string */
+  const price = (course as any).price ?? 499;
+  const originalPrice = (course as any).originalPrice;
+
+  /* Lesson count meta */
+  const lessonCount = (course as any).lessonCount ?? (course as any).lessons?.length ?? 0;
+  const hours = (course as any).totalHours ?? (lessonCount ? `${Math.ceil(lessonCount * 0.2)}h` : "");
 
   return (
     <Link
-      to={`/courses/${course._id}`}
-      className="group block animate-fade-in"
+      to={`/courses/${(course as any).slug ?? course._id}`}
+      className="block group"
       id={`course-card-${course._id}`}
     >
-      <div
-        className="glass rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1"
-        style={{ borderColor: "var(--color-border)" }}
-      >
-        {/* Thumbnail */}
-        <div className="relative h-44 overflow-hidden" style={{ background: "var(--color-surface-2)" }}>
-          {course.thumbnail ? (
-            <img
-              src={course.thumbnail}
-              alt={course.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="flex flex-col items-center gap-2 opacity-30">
-                <BookOpen className="w-10 h-10" style={{ color: "var(--color-accent)" }} />
-                <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
-                  No thumbnail
-                </span>
-              </div>
-            </div>
-          )}
+      <div className="bg-paper border border-line rounded-md overflow-hidden cursor-pointer transition-all duration-[180ms] hover:-translate-y-1 hover:border-t3 shadow-card">
 
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        {/* Thumbnail — 150px, domain gradient, tag top-left, glyph center */}
+        <div className={`${domain.thumbClass} h-[150px] relative flex items-center justify-center`}>
+          <span className="absolute top-[10px] left-[10px] font-mono text-[10.5px] font-medium px-[9px] py-1 rounded-sm text-white bg-black/[0.32]">
+            {domain.label}
+          </span>
+          <span className="text-[30px] select-none" aria-hidden="true">{domain.glyph}</span>
         </div>
 
-        {/* Content */}
-        <div className="p-5">
-          <h3
-            className="font-semibold text-base mb-2 line-clamp-2 leading-snug transition-colors duration-200"
-            style={{ color: "var(--color-text)" }}
-          >
+        {/* Body */}
+        <div className="p-4">
+          <h3 className="font-body font-semibold text-[16px] text-ink mb-[7px] whitespace-nowrap overflow-hidden text-ellipsis">
             {course.title}
           </h3>
 
-          <p
-            className="text-sm mb-4 line-clamp-2 leading-relaxed"
-            style={{ color: "var(--color-text-muted)" }}
-          >
-            {course.description}
-          </p>
+          {/* Meta row — rating placeholder (backend has no rating field yet) */}
+          <div className="flex items-center gap-[7px] text-[13px] text-t2 mb-[13px]">
+            <span className="text-gold">★★★★★</span>
+            <span>4.8 (—)</span>
+          </div>
 
-          {/* Footer */}
-          <div
-            className="flex items-center justify-between pt-4"
-            style={{ borderTop: "1px solid var(--color-border)" }}
-          >
-            <div className="flex items-center gap-2">
-              <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold"
-                style={{ background: "var(--color-primary-light)", color: "var(--color-accent)" }}
-              >
-                {course.instructor?.avatar ? (
-                  <img
-                    src={course.instructor.avatar}
-                    alt={course.instructor.name}
-                    className="w-7 h-7 rounded-full object-cover"
-                  />
-                ) : (
-                  <User className="w-3.5 h-3.5" />
-                )}
+          {/* Footer row */}
+          <div className="flex items-center justify-between">
+            <div className="font-mono font-semibold text-[13px] text-ink">
+              {originalPrice && (
+                <span className="text-t3 line-through font-normal mr-[6px]">
+                  ₹{originalPrice.toLocaleString()}
+                </span>
+              )}
+              ₹{price.toLocaleString()}
+            </div>
+            {lessonCount > 0 && (
+              <div className="font-mono text-[11px] text-t3">
+                {lessonCount} lessons{hours ? ` · ${hours}` : ""}
               </div>
-              <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
-                {course.instructor?.name ?? "Instructor"}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" style={{ color: "var(--color-text-dim)" }} />
-              <span className="text-xs" style={{ color: "var(--color-text-dim)" }}>
-                {formattedDate}
-              </span>
-            </div>
+            )}
           </div>
         </div>
       </div>

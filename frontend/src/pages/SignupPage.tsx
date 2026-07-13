@@ -1,207 +1,108 @@
+/* /signup — Modal spec §15 as full page */
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, UserPlus, BookOpen } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { authApi, type SignupPayload } from "../api/auth.api";
 import { useAuthStore } from "../store/authStore";
+import Button from "../components/Button";
+import { Eye, EyeOff } from "lucide-react";
 
 const SignupPage = () => {
   const [form, setForm] = useState<SignupPayload>({ name: "", email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const { setUser } = useAuthStore();
   const navigate = useNavigate();
 
-  const signupMutation = useMutation({
+  const mutation = useMutation({
     mutationFn: authApi.signup,
-    onSuccess: (user) => {
-      setUser(user);
-      navigate("/dashboard");
-    },
-    onError: (err: any) => {
-      setError(err?.response?.data?.message ?? "Registration failed. Please try again.");
-    },
+    onSuccess: (user) => { setUser(user); navigate("/dashboard"); },
+    onError: (err: any) => setError(err?.response?.data?.message ?? "Registration failed. Please try again."),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (form.password.length < 6) {
-      setError("Password must be at least 6 characters.");
-      return;
-    }
-    signupMutation.mutate(form);
+    if (form.password.length < 8) { setError("Password must be at least 8 characters."); return; }
+    mutation.mutate(form);
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12">
-      {/* Background orbs */}
-      <div
-        className="fixed top-1/3 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-10 pointer-events-none"
-        style={{ background: "radial-gradient(circle, var(--color-accent), transparent)" }}
+  const field = (
+    id: string, label: string, type: string, value: string,
+    onChange: (v: string) => void, placeholder: string, autoComplete?: string
+  ) => (
+    <div>
+      <label htmlFor={id} className="font-mono text-[11.5px] text-t3 block mb-[7px]">{label}</label>
+      <input
+        id={id}
+        type={type}
+        autoComplete={autoComplete}
+        required
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full h-11 bg-paper-sunken border border-line rounded-sm px-3 text-[13.5px] text-ink font-body focus:outline-none focus:border-axiom transition-colors"
       />
+    </div>
+  );
 
-      <div className="w-full max-w-md animate-fade-in">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 glow-sm"
-            style={{ background: "linear-gradient(135deg, var(--color-primary), #5b21b6)" }}
-          >
-            <BookOpen className="w-7 h-7 text-white" />
+  return (
+    <div className="min-h-screen bg-bone flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-[400px]">
+        <div className="bg-paper rounded-lg overflow-hidden shadow-modal">
+          <div className="px-[22px] py-[18px] border-b border-line">
+            <h1 className="font-display font-semibold text-[18px] text-ink">Create your account</h1>
           </div>
-          <h1 className="text-3xl font-black mb-1" style={{ color: "var(--color-text)" }}>
-            Create account
-          </h1>
-          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-            Join AxiomLearn and start learning today
-          </p>
-        </div>
 
-        {/* Form Card */}
-        <div className="gradient-border p-8">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Error Banner */}
+          <div className="p-[22px]">
             {error && (
-              <div
-                className="px-4 py-3 rounded-lg text-sm font-medium"
-                style={{ background: "rgba(239,68,68,0.1)", color: "var(--color-error)", border: "1px solid rgba(239,68,68,0.2)" }}
-              >
+              <div className="mb-4 px-3 py-[10px] rounded-sm bg-danger-tint text-danger text-[13px]">
                 {error}
               </div>
             )}
 
-            {/* Name */}
-            <div>
-              <label htmlFor="signup-name" className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-muted)" }}>
-                Full name
-              </label>
-              <input
-                id="signup-name"
-                type="text"
-                autoComplete="name"
-                required
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="John Doe"
-                className="w-full px-4 py-3 rounded-xl text-sm input-glow transition-all duration-200"
-                style={{
-                  background: "var(--color-surface-2)",
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text)",
-                }}
-              />
-            </div>
+            <form onSubmit={handleSubmit} className="space-y-[14px]">
+              {field("signup-name", "Full name", "text", form.name, (v) => setForm({ ...form, name: v }), "Sana Khan", "name")}
+              {field("signup-email", "Email", "email", form.email, (v) => setForm({ ...form, email: v }), "you@example.com", "email")}
 
-            {/* Email */}
-            <div>
-              <label htmlFor="signup-email" className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-muted)" }}>
-                Email address
-              </label>
-              <input
-                id="signup-email"
-                type="email"
-                autoComplete="email"
-                required
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="you@example.com"
-                className="w-full px-4 py-3 rounded-xl text-sm input-glow transition-all duration-200"
-                style={{
-                  background: "var(--color-surface-2)",
-                  border: "1px solid var(--color-border)",
-                  color: "var(--color-text)",
-                }}
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label htmlFor="signup-password" className="block text-sm font-medium mb-2" style={{ color: "var(--color-text-muted)" }}>
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="signup-password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  required
-                  minLength={6}
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  placeholder="Min. 6 characters"
-                  className="w-full px-4 py-3 pr-12 rounded-xl text-sm input-glow transition-all duration-200"
-                  style={{
-                    background: "var(--color-surface-2)",
-                    border: "1px solid var(--color-border)",
-                    color: "var(--color-text)",
-                  }}
-                />
-                <button
-                  type="button"
-                  id="signup-toggle-password"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded transition-opacity duration-200 hover:opacity-70 cursor-pointer"
-                  style={{ color: "var(--color-text-dim)" }}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              {/* Password strength bar */}
-              {form.password.length > 0 && (
-                <div className="mt-2 flex gap-1">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="h-1 flex-1 rounded-full transition-colors duration-300"
-                      style={{
-                        background:
-                          form.password.length >= i * 3
-                            ? i <= 1 ? "var(--color-error)" : i <= 2 ? "var(--color-warning)" : "var(--color-success)"
-                            : "var(--color-border)",
-                      }}
-                    />
-                  ))}
+              {/* Password with toggle */}
+              <div>
+                <label htmlFor="signup-password" className="font-mono text-[11.5px] text-t3 block mb-[7px]">Password</label>
+                <div className="relative">
+                  <input
+                    id="signup-password"
+                    type={showPw ? "text" : "password"}
+                    autoComplete="new-password"
+                    required
+                    minLength={8}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    placeholder="Minimum 8 characters"
+                    className="w-full h-11 bg-paper-sunken border border-line rounded-sm px-3 pr-10 text-[13.5px] text-ink font-body focus:outline-none focus:border-axiom transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw(!showPw)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-t3 hover:text-t2"
+                    tabIndex={-1}
+                  >
+                    {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Submit */}
-            <button
-              id="signup-submit-btn"
-              type="submit"
-              disabled={signupMutation.isPending}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-semibold text-sm text-white transition-all duration-200 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer mt-2"
-              style={{ background: "linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))" }}
-            >
-              {signupMutation.isPending ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <UserPlus className="w-4 h-4" />
-                  Create Account
-                </>
-              )}
-            </button>
+              <Button type="submit" variant="primary" size="lg" block disabled={mutation.isPending} id="signup-submit-btn">
+                {mutation.isPending ? "Creating account…" : "Create account"}
+              </Button>
+            </form>
 
-            <p className="text-xs text-center" style={{ color: "var(--color-text-dim)" }}>
-              By signing up, you agree to our Terms of Service and Privacy Policy.
+            <p className="text-[12.5px] text-t2 text-center mt-[14px]">
+              Already have an account?{" "}
+              <Link to="/login" className="text-axiom hover:underline" id="signup-login-link">Log in</Link>
             </p>
-          </form>
+          </div>
         </div>
-
-        {/* Footer link */}
-        <p className="text-center text-sm mt-6" style={{ color: "var(--color-text-muted)" }}>
-          Already have an account?{" "}
-          <Link
-            to="/login"
-            id="signup-login-link"
-            className="font-semibold hover:opacity-80 transition-opacity"
-            style={{ color: "var(--color-accent)" }}
-          >
-            Sign in
-          </Link>
-        </p>
       </div>
     </div>
   );
