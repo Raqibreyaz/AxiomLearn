@@ -186,14 +186,15 @@ export const updateAvatar = async (req: Request, res: Response) => {
   }
 
   const s3ObjectUrl = await uploadFile(req.file.path);
+  const oldAvatarUrl = user.avatar
   user.avatar = s3ObjectUrl;
 
   try {
     await user.save();
 
     // delete the old avatar from s3 if it exists
-    if (user.avatar) {
-      await deleteFile(user.avatar);
+    if (oldAvatarUrl) {
+      await deleteFile(oldAvatarUrl);
     }
     // delete the local uploaded file
     await rm(req.file.path);

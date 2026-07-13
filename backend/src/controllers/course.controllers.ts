@@ -124,16 +124,17 @@ export const updateThumbnail = async (req: Request, res: Response) => {
   }
 
   const s3ObjectUrl = await uploadFile(req.file.path);
+  const oldThumbnailUrl = course.thumbnail;
   course.thumbnail = s3ObjectUrl;
 
   try {
     await course.save();
 
     // Delete old thumbnail if it exists
-    if (course.thumbnail) {
-      await deleteFile(course.thumbnail);
+    if (oldThumbnailUrl) {
+      await deleteFile(oldThumbnailUrl);
     }
-    
+
     // delete the local uploaded file
     await rm(req.file.path);
   } catch (error) {

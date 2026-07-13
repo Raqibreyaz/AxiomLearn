@@ -15,6 +15,16 @@ const upload = (req: Request, _res: Response, next: NextFunction): void => {
   const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
   const filepath = path.join(UPLOAD_DIR, uniqueSuffix);
 
+  const contentType = req.headers["content-type"];
+  if (!contentType || !contentType.startsWith("image/"))
+    return next(new ApiError(403, "A valid image is required!"));
+
+  const contentLength = req.headers["content-length"];
+  if (contentLength && parseInt(contentLength, 10) === 0) {
+    next(new ApiError(400, "No file uploaded or file is empty"));
+    return;
+  }
+
   const writeStream = createWriteStream(filepath);
   let bodySize = 0;
   let limitExceeded = false;
@@ -54,6 +64,16 @@ const upload = (req: Request, _res: Response, next: NextFunction): void => {
 
   req.on("end", () => {
     if (limitExceeded) return;
+
+    if (bodySize === 0) {
+      cleanup();
+      if (!nextCalled) {
+        nextCalled = true;
+        next(new ApiError(400, "No file uploaded or file is empty"));
+      }
+      return;
+    }
+
     writeStream.end();
   });
 

@@ -11,7 +11,7 @@ const router = Router({ mergeParams: true });
 // Protected routes (Admin and Instructor only)
 router.use("/:sectionId/lectures", lectureRouter);
 
-router.post("/:courseId", createSection);
+router.post("/", createSection);
 
 router.patch("/:sectionId", updateSection);
 

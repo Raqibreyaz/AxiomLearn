@@ -35,7 +35,6 @@ router.post(
   "/",
   verifySession,
   authorizeRoles("admin", "instructor"),
-  authorizeCourseAccess,
   createCourse,
 );
 router.patch(

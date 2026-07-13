@@ -6,20 +6,24 @@ import {
   S3ClientConfig,
 } from "@aws-sdk/client-s3";
 import { createReadStream } from "node:fs";
+const CLOUDFLARE_ACCOUNT_ID = process.env["CLOUDFLARE_ACCOUNT_ID"];
+const CLOUDFLARE_ACCESS_KEY_ID = process.env["CLOUDFLARE_ACCESS_KEY_ID"];
+const CLOUDFLARE_ACCESS_KEY_SECRET =
+  process.env["CLOUDFLARE_ACCESS_KEY_SECRET"];
+const R2_S3_IMAGE_BUCKET = process.env["R2_S3_IMAGE_BUCKET"];
+const R2_PUBLIC_URL = process.env["R2_PUBLIC_URL"];
 
-const AWS_ACCESS_KEY_ID = process.env["AWS_ACCESS_KEY_ID"];
-const AWS_ACCESS_KEY_SECRET = process.env["AWS_ACCESS_KEY_SECRET"];
-const AWS_S3_IMAGE_BUCKET = process.env["AWS_S3_IMAGE_BUCKET"];
-const AWS_S3_REGION = process.env["AWS_S3_REGION"];
+if (!R2_S3_IMAGE_BUCKET) console.log("image storage bucket is required!");
 
-if (!AWS_S3_IMAGE_BUCKET || !AWS_S3_REGION)
-  console.log("image storage bucket and s3 region both are required!");
+const config: S3ClientConfig = {
+  region: "auto",
+  endpoint: `https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+};
 
-const config: S3ClientConfig = {};
-if (AWS_ACCESS_KEY_ID && AWS_ACCESS_KEY_SECRET)
+if (CLOUDFLARE_ACCESS_KEY_ID && CLOUDFLARE_ACCESS_KEY_SECRET)
   config.credentials = {
-    accessKeyId: AWS_ACCESS_KEY_ID,
-    secretAccessKey: AWS_ACCESS_KEY_SECRET,
+    accessKeyId: CLOUDFLARE_ACCESS_KEY_ID,
+    secretAccessKey: CLOUDFLARE_ACCESS_KEY_SECRET,
   };
 
 const s3 = new S3Client(config);
@@ -30,23 +34,23 @@ export const uploadFile = async (filepath: string): Promise<string> => {
 
   await s3.send(
     new PutObjectCommand({
-      Bucket: AWS_S3_IMAGE_BUCKET,
+      Bucket: R2_S3_IMAGE_BUCKET,
       Key: objectKey,
       Body: readStream,
+      ContentType: "image/jpeg",
     }),
   );
 
   //   ("https://<bucket>.s3.<region>.amazonaws.com/<key>");
-  const s3ObjectUrl = `https://${AWS_S3_IMAGE_BUCKET}.s3.${AWS_S3_REGION}.amazonaws.com/${encodeURIComponent(objectKey)}`;
-  return s3ObjectUrl;
+  return `${R2_PUBLIC_URL}/${encodeURIComponent(objectKey)}`;
 };
 
 export const deleteFile = async (s3ObjectUrl: string) => {
   //"https://<bucket>.s3.<region>.amazonaws.com/<key>"
   const url = new URL(s3ObjectUrl);
-  const objectKey = url.pathname;
+  const objectKey = url.pathname.slice(1);
 
   await s3.send(
-    new DeleteObjectCommand({ Bucket: AWS_S3_IMAGE_BUCKET, Key: objectKey }),
+    new DeleteObjectCommand({ Bucket: R2_S3_IMAGE_BUCKET, Key: objectKey }),
   );
 };
