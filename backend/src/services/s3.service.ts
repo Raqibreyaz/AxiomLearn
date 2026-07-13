@@ -13,7 +13,7 @@ const AWS_S3_IMAGE_BUCKET = process.env["AWS_S3_IMAGE_BUCKET"];
 const AWS_S3_REGION = process.env["AWS_S3_REGION"];
 
 if (!AWS_S3_IMAGE_BUCKET || !AWS_S3_REGION)
-  throw new Error("image storage bucket and s3 region both are required!");
+  console.log("image storage bucket and s3 region both are required!");
 
 const config: S3ClientConfig = {};
 if (AWS_ACCESS_KEY_ID && AWS_ACCESS_KEY_SECRET)

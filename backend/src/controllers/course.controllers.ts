@@ -36,9 +36,9 @@ export const getCourses = async (req: Request, res: Response) => {
 // @route   GET /api/v1/courses/:id
 // @access  Public
 export const getCourseById = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { courseId } = req.params;
 
-  const course = await Course.findById(id)
+  const course = await Course.findById(courseId)
     .populate("instructor", "name avatar")
     .lean();
 
@@ -90,15 +90,15 @@ export const createCourse = async (req: Request, res: Response) => {
 // @route   PATCH /api/v1/courses/:id
 // @access  Private (Instructor/Admin)
 export const updateCourse = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const course = await Course.findById(id);
+  const { courseId } = req.params;
+  const course = await Course.findById(courseId);
 
   if (!course) {
     throw new ApiError(404, "Course not found");
   }
 
   const updatedCourse = await Course.findByIdAndUpdate(
-    id,
+    courseId,
     { $set: req.body },
     { new: true, runValidators: true },
   );
@@ -112,8 +112,8 @@ export const updateCourse = async (req: Request, res: Response) => {
 // @route   POST /api/v1/courses/:id/thumbnail
 // @access  Private (Instructor/Admin)
 export const updateThumbnail = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const course = await Course.findById(id);
+  const { courseId } = req.params;
+  const course = await Course.findById(courseId);
 
   if (!course) {
     throw new ApiError(404, "Course not found");
@@ -153,9 +153,9 @@ export const updateThumbnail = async (req: Request, res: Response) => {
 // @route   DELETE /api/v1/courses/:id
 // @access  Private (Instructor/Admin)
 export const deleteCourse = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { courseId } = req.params;
 
-  const course = await Course.findById(id);
+  const course = await Course.findById(courseId);
 
   if (!course) {
     throw new ApiError(404, "Course not found");
@@ -180,7 +180,7 @@ export const deleteCourse = async (req: Request, res: Response) => {
   await CourseProgress.deleteMany({ course: course._id });
 
   // Delete the course
-  await Course.findByIdAndDelete(id);
+  await Course.findByIdAndDelete(courseId);
 
   return res
     .status(200)

@@ -19,7 +19,7 @@ const router = Router({ mergeParams: true });
 
 // Public routes
 router.get("/", getCourses);
-router.get("/:id", getCourseById);
+router.get("/:courseId", getCourseById);
 
 // src/routes/course.routes.ts
 router.use(
@@ -39,21 +39,21 @@ router.post(
   createCourse,
 );
 router.patch(
-  "/:id",
+  "/:courseId",
   verifySession,
   authorizeRoles("admin", "instructor"),
   authorizeCourseAccess,
   updateCourse,
 );
 router.delete(
-  "/:id",
+  "/:courseId",
   verifySession,
   authorizeRoles("admin", "instructor"),
   authorizeCourseAccess,
   deleteCourse,
 );
 router.post(
-  "/:id/thumbnail",
+  "/:courseId/thumbnail",
   verifySession,
   authorizeRoles("admin", "instructor"),
   authorizeCourseAccess,
