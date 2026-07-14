@@ -1,7 +1,14 @@
+User:
+    - settings page is not mobile friendly
+
+Course:
+    - course card in courses page needs a good design
+    - adding domain filtering in courses
+    - adding case-insensitive search across courses
+    - language, duration, domain, learning mode etc. should be added in schema
+    - course edit page is not mobile friendly
+
 Lectures:
 - create lecture: title,position,isPreview,courseId,sectionId and video details to create signed url
 - update lecture: title, posiiton, isPreview
 - delete lecture: delete documents + s3 object
-
-- create the frontend of what is completed so far
-- add course info like language, duration, domain, learning mode

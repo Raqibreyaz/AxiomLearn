@@ -3,13 +3,29 @@ import api from "./axios";
 export interface Course {
   _id: string;
   title: string;
+  slug?: string;
   description: string;
+  shortDescription?: string;
   thumbnail?: string;
   instructor: {
     _id: string;
     name: string;
     avatar?: string;
+    bio?: string;
   };
+  language?: "en" | "hi" | "hinglish";
+  learningMode?: "live" | "recorded" | "hybrid";
+  domain?: string;
+  level?: "beginner" | "intermediate" | "advanced" | "all-levels";
+  tags?: string[];
+  isFeatured?: boolean;
+  status?: "draft" | "published" | "archived";
+  price?: number;
+  originalPrice?: number;
+  currency?: string;
+  lessonCount?: number;
+  totalHours?: string;
+  lessons?: any[];
   sections?: Section[];
   createdAt: string;
   updatedAt: string;
@@ -41,13 +57,29 @@ export interface Lecture {
 export interface CreateCoursePayload {
   title: string;
   description: string;
+  shortDescription: string;
+  domain: string;
   thumbnail?: string;
+  language?: "en" | "hi" | "hinglish";
+  learningMode?: "live" | "recorded" | "hybrid";
+  level?: "beginner" | "intermediate" | "advanced" | "all-levels";
+  tags?: string[];
+  status?: "draft" | "published" | "archived";
+  price?: number;
 }
 
 export interface UpdateCoursePayload {
   title?: string;
   description?: string;
+  shortDescription?: string;
+  domain?: string;
   thumbnail?: string;
+  language?: "en" | "hi" | "hinglish";
+  learningMode?: "live" | "recorded" | "hybrid";
+  level?: "beginner" | "intermediate" | "advanced" | "all-levels";
+  tags?: string[];
+  status?: "draft" | "published" | "archived";
+  price?: number;
 }
 
 export interface CreateSectionPayload {

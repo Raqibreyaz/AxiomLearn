@@ -53,7 +53,7 @@ const CourseDetailPage = () => {
   const { data: course, isLoading, isError } = useCourse(id!);
 
   const isInstructor = user && (user.role === "instructor" || user.role === "admin" || user.role === "owner");
-  const canEdit = isInstructor && course && (user._id === (course.instructor as any)?._id || user.role === "admin" || user.role === "owner");
+  const canEdit = isInstructor && course && (user._id === course.instructor?._id || user.role === "admin" || user.role === "owner");
 
   if (isLoading) return <LoadingSpinner fullScreen />;
   if (isError || !course) {
@@ -67,9 +67,9 @@ const CourseDetailPage = () => {
     );
   }
 
-  const domain = domainConfig[(course as any).domain?.toUpperCase()] ?? domainConfig.CODE;
-  const price = (course as any).price ?? 499;
-  const originalPrice = (course as any).originalPrice;
+  const domain = domainConfig[course.domain?.toUpperCase() ?? ""] ?? domainConfig.CODE;
+  const price = course.price ?? 499;
+  const originalPrice = course.originalPrice;
   const curriculum = getMockCurriculum(course.title);
 
   return (
@@ -83,7 +83,7 @@ const CourseDetailPage = () => {
             <div>
               {/* Breadcrumb */}
               <div className="font-mono text-[12px] text-t3 mb-[18px]">
-                ~/courses/<b className="text-axiom font-medium">{(course as any).slug ?? id}</b>
+                ~/courses/<b className="text-axiom font-medium">{course.slug ?? id}</b>
               </div>
 
               <h1 className="font-display font-semibold text-[34px] leading-[1.15] text-ink mb-[14px]">
@@ -97,10 +97,10 @@ const CourseDetailPage = () => {
               {/* Instructor row */}
               <div className="flex items-center gap-[10px] mb-5">
                 <div className="w-[30px] h-[30px] rounded-pill bg-gradient-to-br from-axiom to-d-design flex items-center justify-center text-white text-sm font-semibold shrink-0">
-                  {(course.instructor as any)?.name?.charAt(0) ?? "I"}
+                  {course.instructor?.name?.charAt(0) ?? "I"}
                 </div>
                 <span className="text-[13.5px] text-t2">
-                  Created by <b className="text-ink">{(course.instructor as any)?.name ?? "Instructor"}</b>
+                  Created by <b className="text-ink">{course.instructor?.name ?? "Instructor"}</b>
                 </span>
               </div>
 
@@ -109,7 +109,8 @@ const CourseDetailPage = () => {
                 {[
                   "★ 4.8 (—)",
                   `${curriculum.reduce((a, s) => a + s.lessons.length, 0)} lessons total`,
-                  "English",
+                  course.language === "en" ? "English" : course.language === "hi" ? "Hindi" : "Hinglish",
+                  course.level === "all-levels" ? "All Levels" : (course.level ? course.level.charAt(0).toUpperCase() + course.level.slice(1) : "Beginner"),
                 ].map((badge) => (
                   <span key={badge} className="font-mono text-[11.5px] text-t2 border border-line px-[10px] py-[5px] rounded-sm">
                     {badge}
@@ -215,7 +216,7 @@ const CourseDetailPage = () => {
               <div className="bg-paper border border-line rounded-md p-[22px] space-y-4">
                 <div className="flex justify-between items-center text-[13.5px]">
                   <span className="font-mono text-t3 uppercase tracking-wider text-[11px]">Domain</span>
-                  <span className="font-medium text-ink capitalize">{(course as any).domain?.toLowerCase() ?? "Code"}</span>
+                  <span className="font-medium text-ink capitalize">{course.domain?.toLowerCase() ?? "Code"}</span>
                 </div>
                 <div className="border-t border-line" />
                 <div className="flex justify-between items-center text-[13.5px]">
@@ -230,12 +231,12 @@ const CourseDetailPage = () => {
                 <div className="border-t border-line" />
                 <div className="flex justify-between items-center text-[13.5px]">
                   <span className="font-mono text-t3 uppercase tracking-wider text-[11px]">Language</span>
-                  <span className="font-medium text-ink">English</span>
+                  <span className="font-medium text-ink capitalize">{course.language}</span>
                 </div>
                 <div className="border-t border-line" />
                 <div className="flex justify-between items-center text-[13.5px]">
                   <span className="font-mono text-t3 uppercase tracking-wider text-[11px]">Learning Mode</span>
-                  <span className="font-medium text-ink">Self-Paced</span>
+                  <span className="font-medium text-ink capitalize">{course.learningMode}</span>
                 </div>
               </div>
             </div>
@@ -245,26 +246,26 @@ const CourseDetailPage = () => {
               <h2 className="font-display font-semibold text-[22px] text-ink mb-4">Instructor</h2>
               <div className="bg-paper border border-line rounded-md p-[22px]">
                 <div className="flex items-center gap-4 mb-4">
-                  {(course.instructor as any)?.avatar ? (
+                  {course.instructor?.avatar ? (
                     <img
-                      src={(course.instructor as any).avatar}
-                      alt={(course.instructor as any).name}
+                      src={course.instructor.avatar}
+                      alt={course.instructor.name}
                       className="w-14 h-14 rounded-full object-cover border border-line"
                     />
                   ) : (
                     <div className="w-14 h-14 rounded-full bg-gradient-to-br from-axiom to-d-design flex items-center justify-center text-white text-xl font-bold">
-                      {((course.instructor as any)?.name ?? "I").charAt(0).toUpperCase()}
+                      {(course.instructor?.name ?? "I").charAt(0).toUpperCase()}
                     </div>
                   )}
                   <div>
                     <h3 className="font-body font-semibold text-[16px] text-ink">
-                      {(course.instructor as any)?.name ?? "Instructor"}
+                      {course.instructor?.name ?? "Instructor"}
                     </h3>
                     <p className="font-mono text-[11px] text-t3 mt-0.5">Course Creator</p>
                   </div>
                 </div>
                 <p className="text-[13.5px] text-t2 leading-relaxed">
-                  {(course.instructor as any)?.bio ?? "Expert instructor dedicated to providing high-quality, practical learning resources. Learn step-by-step with structured lessons and assignments."}
+                  {course.instructor?.bio ?? "Expert instructor dedicated to providing high-quality, practical learning resources. Learn step-by-step with structured lessons and assignments."}
                 </p>
               </div>
             </div>

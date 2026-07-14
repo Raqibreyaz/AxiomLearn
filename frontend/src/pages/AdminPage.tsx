@@ -17,7 +17,7 @@ const AdminPage = () => {
     c.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const published = courses.filter((c) => (c as any).status !== "DRAFT").length;
+  const published = courses.filter((c) => c.status !== "draft").length;
   const draft = courses.length - published;
 
   return (
@@ -80,15 +80,15 @@ const AdminPage = () => {
                       <b className="font-semibold text-ink">{course.title}</b>
                     </td>
                     <td className="px-[14px] py-[13px] border-b border-line text-t2">
-                      {(course as any).domain ?? "—"}
+                      {course.domain ?? "—"}
                     </td>
                     <td className="px-[14px] py-[13px] border-b border-line text-t2 font-mono">
-                      {(course as any).price ? `₹${(course as any).price.toLocaleString()}` : "—"}
+                      {course.price ? `₹${course.price.toLocaleString()}` : "—"}
                     </td>
                     <td className="px-[14px] py-[13px] border-b border-line">
                       <StatusPill
-                        status={(course as any).status === "DRAFT" ? "warning" : "success"}
-                        label={(course as any).status === "DRAFT" ? "Draft" : "Published"}
+                        status={course.status === "draft" ? "warning" : "success"}
+                        label={course.status === "draft" ? "Draft" : "Published"}
                       />
                     </td>
                     <td className="px-[14px] py-[13px] border-b border-line">

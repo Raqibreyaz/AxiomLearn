@@ -28,7 +28,18 @@ const EditCoursePage = () => {
   const updateSectionMutation = useUpdateSection(id!);
   const deleteSectionMutation = useDeleteSection(id!);
 
-  const [form, setForm] = useState({ title: "", description: "" });
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    shortDescription: "",
+    domain: "code",
+    language: "en" as "en" | "hi" | "hinglish",
+    learningMode: "recorded" as "live" | "recorded" | "hybrid",
+    level: "beginner" as "beginner" | "intermediate" | "advanced" | "all-levels",
+    tagsInput: "",
+    status: "draft" as "draft" | "published" | "archived",
+    price: 0,
+  });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
@@ -43,6 +54,14 @@ const EditCoursePage = () => {
       setForm({
         title: course.title,
         description: course.description,
+        shortDescription: course.shortDescription || "",
+        domain: course.domain || "code",
+        language: course.language || "en",
+        learningMode: course.learningMode || "recorded",
+        level: course.level || "beginner",
+        tagsInput: course.tags ? course.tags.join(", ") : "",
+        status: course.status || "draft",
+        price: course.price || 0,
       });
       if (course.thumbnail) {
         setThumbnailPreview(course.thumbnail);
@@ -121,13 +140,42 @@ const EditCoursePage = () => {
     e.preventDefault();
     setError("");
     setSuccess("");
-    updateMutation.mutate(form, {
-      onSuccess: () => {
-        setSuccess("Course details updated successfully!");
-        setTimeout(() => setSuccess(""), 3000);
+
+    if (!form.title.trim() || !form.description.trim() || !form.shortDescription.trim() || !form.domain.trim()) {
+      setError("Title, description, short description, and domain are required.");
+      return;
+    }
+    if (form.shortDescription.length > 180) {
+      setError("Short description must be 180 characters or less.");
+      return;
+    }
+
+    const tags = form.tagsInput
+      .split(",")
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean);
+
+    updateMutation.mutate(
+      {
+        title: form.title,
+        description: form.description,
+        shortDescription: form.shortDescription,
+        domain: form.domain,
+        language: form.language,
+        learningMode: form.learningMode,
+        level: form.level,
+        tags,
+        status: form.status,
+        price: Number(form.price),
       },
-      onError: (err: any) => setError(err?.response?.data?.message ?? "Failed to update course."),
-    });
+      {
+        onSuccess: () => {
+          setSuccess("Course details updated successfully!");
+          setTimeout(() => setSuccess(""), 3000);
+        },
+        onError: (err: any) => setError(err?.response?.data?.message ?? "Failed to update course."),
+      }
+    );
   };
 
   const handleDelete = () => {
@@ -240,8 +288,26 @@ const EditCoursePage = () => {
                 </div>
 
                 <div>
+                  <label htmlFor="shortDescription" className="block font-mono text-[11.5px] text-t3 mb-[7px]">
+                    Short Description <span className="text-error">*</span>
+                  </label>
+                  <textarea
+                    id="shortDescription"
+                    required
+                    maxLength={180}
+                    rows={2}
+                    value={form.shortDescription}
+                    onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
+                    className="w-full bg-paper border border-line rounded-sm p-3 text-[13.5px] text-ink font-body focus:outline-none focus:border-axiom transition-colors resize-none"
+                  />
+                  <p className="text-[11px] text-t3 mt-1 text-right">
+                    {form.shortDescription.length} / 180 characters
+                  </p>
+                </div>
+
+                <div>
                   <label htmlFor="description" className="block font-mono text-[11.5px] text-t3 mb-[7px]">
-                    Description <span className="text-error">*</span>
+                    Full Description <span className="text-error">*</span>
                   </label>
                   <textarea
                     id="description"
@@ -253,7 +319,125 @@ const EditCoursePage = () => {
                   />
                 </div>
 
-                <div className="pt-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="domain" className="block font-mono text-[11.5px] text-t3 mb-[7px]">
+                      Domain <span className="text-error">*</span>
+                    </label>
+                    <select
+                      id="domain"
+                      value={form.domain}
+                      onChange={(e) => setForm({ ...form, domain: e.target.value })}
+                      className="w-full h-11 bg-paper border border-line rounded-sm px-3 text-[13.5px] text-ink focus:outline-none focus:border-axiom transition-colors"
+                    >
+                      <option value="code">Code</option>
+                      <option value="design">Design</option>
+                      <option value="business">Business</option>
+                      <option value="data">Data</option>
+                      <option value="language">Language</option>
+                      <option value="creative">Creative</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="price" className="block font-mono text-[11.5px] text-t3 mb-[7px]">
+                      Price (INR)
+                    </label>
+                    <input
+                      id="price"
+                      type="number"
+                      min={0}
+                      value={form.price}
+                      onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                      className="w-full h-11 bg-paper border border-line rounded-sm px-3 text-[13.5px] text-ink focus:outline-none focus:border-axiom transition-colors"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label htmlFor="level" className="block font-mono text-[11.5px] text-t3 mb-[7px]">
+                      Level
+                    </label>
+                    <select
+                      id="level"
+                      value={form.level}
+                      onChange={(e) => setForm({ ...form, level: e.target.value as any })}
+                      className="w-full h-11 bg-paper border border-line rounded-sm px-3 text-[13.5px] text-ink focus:outline-none focus:border-axiom transition-colors"
+                    >
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate">Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                      <option value="all-levels">All Levels</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="language" className="block font-mono text-[11.5px] text-t3 mb-[7px]">
+                      Language
+                    </label>
+                    <select
+                      id="language"
+                      value={form.language}
+                      onChange={(e) => setForm({ ...form, language: e.target.value as any })}
+                      className="w-full h-11 bg-paper border border-line rounded-sm px-3 text-[13.5px] text-ink focus:outline-none focus:border-axiom transition-colors"
+                    >
+                      <option value="en">English</option>
+                      <option value="hi">Hindi</option>
+                      <option value="hinglish">Hinglish</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="learningMode" className="block font-mono text-[11.5px] text-t3 mb-[7px]">
+                      Learning Mode
+                    </label>
+                    <select
+                      id="learningMode"
+                      value={form.learningMode}
+                      onChange={(e) => setForm({ ...form, learningMode: e.target.value as any })}
+                      className="w-full h-11 bg-paper border border-line rounded-sm px-3 text-[13.5px] text-ink focus:outline-none focus:border-axiom transition-colors"
+                    >
+                      <option value="recorded">Recorded</option>
+                      <option value="live">Live</option>
+                      <option value="hybrid">Hybrid</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="tags" className="block font-mono text-[11.5px] text-t3 mb-[7px]">
+                      Tags (comma-separated)
+                    </label>
+                    <input
+                      id="tags"
+                      type="text"
+                      value={form.tagsInput}
+                      onChange={(e) => setForm({ ...form, tagsInput: e.target.value })}
+                      placeholder="e.g. react, node, state-management"
+                      className="w-full h-11 bg-paper border border-line rounded-sm px-3 text-[13.5px] text-ink focus:outline-none focus:border-axiom transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="status" className="block font-mono text-[11.5px] text-t3 mb-[7px]">
+                      Status
+                    </label>
+                    <select
+                      id="status"
+                      value={form.status}
+                      onChange={(e) => setForm({ ...form, status: e.target.value as any })}
+                      className="w-full h-11 bg-paper border border-line rounded-sm px-3 text-[13.5px] text-ink focus:outline-none focus:border-axiom transition-colors"
+                    >
+                      <option value="draft">Draft</option>
+                      <option value="published">Published</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="pt-4">
                   <Button
                     type="submit"
                     variant="primary"

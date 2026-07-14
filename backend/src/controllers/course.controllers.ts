@@ -13,12 +13,32 @@ import { rm } from "node:fs/promises";
 // @route   GET /api/v1/courses
 // @access  Public
 export const getCourses = async (req: Request, res: Response) => {
-  const { search } = req.query;
+  const { search, domain, level, status } = req.query;
 
   const query: any = {};
 
-  if (search) {
+  if (search && typeof search === "string") {
     query.title = { $regex: search, $options: "i" };
+  }
+
+  if (domain && typeof domain === "string") {
+    query.domain = domain.toLowerCase();
+  }
+
+  if (level && typeof level === "string") {
+    query.level = level;
+  }
+
+  // Handle visibility filtering based on status and user role
+  if (status && typeof status === "string") {
+    query.status = status;
+  } else if (!req.user || req.user.role === "student") {
+    query.status = "published";
+  } else if (req.user.role === "instructor") {
+    query.$or = [
+      { status: "published" },
+      { instructor: req.user._id },
+    ];
   }
 
   const courses = await Course.find(query)
@@ -66,18 +86,36 @@ export const getCourseById = async (req: Request, res: Response) => {
 // @route   POST /api/v1/courses
 // @access  Private (Instructor/Admin)
 export const createCourse = async (req: Request, res: Response) => {
-  // multer middleware uploads the file to s3
-  const { title, description } = req.body;
+  const {
+    title,
+    description,
+    shortDescription,
+    domain,
+    price,
+    language,
+    learningMode,
+    level,
+    tags,
+    status,
+  } = req.body;
 
   if (!req.user) throw new ApiError(401, "User must be authorized first!");
 
-  if (!title || !description) {
-    throw new ApiError(400, "Title and description are required");
+  if (!title || !description || !shortDescription || !domain) {
+    throw new ApiError(400, "Title, description, shortDescription, and domain are required");
   }
 
   const course = await Course.create({
     title,
     description,
+    shortDescription,
+    domain,
+    price,
+    language,
+    learningMode,
+    level,
+    tags,
+    status,
     instructor: req.user._id,
   });
 
@@ -91,14 +129,18 @@ export const createCourse = async (req: Request, res: Response) => {
 // @access  Private (Instructor/Admin)
 export const updateCourse = async (req: Request, res: Response) => {
   const { courseId } = req.params;
-  const course = await Course.findById(courseId);
+  const course = req.course || await Course.findById(courseId);
 
   if (!course) {
     throw new ApiError(404, "Course not found");
   }
 
+  if (!req.user) {
+    throw new ApiError(401, "Unauthorized - Authentication required");
+  }
+
   const updatedCourse = await Course.findByIdAndUpdate(
-    courseId,
+    course._id,
     { $set: req.body },
     { new: true, runValidators: true },
   );

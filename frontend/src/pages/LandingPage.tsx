@@ -42,7 +42,7 @@ const LandingPage = () => {
   const filteredCourses = courses
     .filter((c) => {
       if (activeDomain !== "All") {
-        const d = (c as any).domain?.toUpperCase();
+        const d = c.domain?.toUpperCase();
         if (d !== activeDomain.toUpperCase()) return false;
       }
       return true;

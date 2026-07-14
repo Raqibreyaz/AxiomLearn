@@ -21,7 +21,7 @@ const CoursesPage = () => {
 
   const filtered = courses.filter((c) => {
     if (activeDomain === "All") return true;
-    return (c as any).domain?.toUpperCase() === activeDomain.toUpperCase();
+    return c.domain?.toUpperCase() === activeDomain.toUpperCase();
   });
 
   const handleSearch = (q: string) => {

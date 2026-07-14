@@ -24,19 +24,19 @@ interface CourseCardProps {
 }
 
 const CourseCard = ({ course }: CourseCardProps) => {
-  const domain = domainConfig[(course as any).domain?.toUpperCase?.()] ?? fallbackDomain;
+  const domain = domainConfig[course.domain?.toUpperCase?.() ?? ""] ?? fallbackDomain;
 
   /* Format price: backend stores in rupees as number or string */
-  const price = (course as any).price ?? 499;
-  const originalPrice = (course as any).originalPrice;
+  const price = course.price ?? 499;
+  const originalPrice = course.originalPrice;
 
   /* Lesson count meta */
-  const lessonCount = (course as any).lessonCount ?? (course as any).lessons?.length ?? 0;
-  const hours = (course as any).totalHours ?? (lessonCount ? `${Math.ceil(lessonCount * 0.2)}h` : "");
+  const lessonCount = course.lessonCount ?? course.lessons?.length ?? 0;
+  const hours = course.totalHours ?? (lessonCount ? `${Math.ceil(lessonCount * 0.2)}h` : "");
 
   return (
     <Link
-      to={`/courses/${(course as any).slug ?? course._id}`}
+      to={`/courses/${course.slug ?? course._id}`}
       className="block group"
       id={`course-card-${course._id}`}
     >
