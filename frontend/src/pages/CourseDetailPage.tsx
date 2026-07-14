@@ -121,11 +121,16 @@ const CourseDetailPage = () => {
             {/* Right: Player card + Buy Box §8 */}
             <div className="bg-paper border border-line rounded-lg overflow-hidden shadow-card">
               {/* Player */}
-              <div className={`${domain.thumbClass} aspect-video flex items-center justify-center relative`}>
-                <span className="absolute top-3 left-3 font-mono text-[11px] bg-black/50 text-white px-[9px] py-1 rounded-sm">
+              <div className="aspect-video flex items-center justify-center relative overflow-hidden bg-paper border-b border-line">
+                {course.thumbnail ? (
+                  <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover absolute inset-0" />
+                ) : (
+                  <div className={`${domain.thumbClass} absolute inset-0`} />
+                )}
+                <span className="absolute top-3 left-3 font-mono text-[11px] bg-black/50 text-white px-[9px] py-1 rounded-sm z-10">
                   ▶ Trailer · 1:32
                 </span>
-                <div className="w-14 h-14 rounded-pill bg-axiom flex items-center justify-center text-white text-[18px]">
+                <div className="w-14 h-14 rounded-pill bg-axiom flex items-center justify-center text-white text-[18px] z-10 cursor-pointer hover:scale-105 transition-transform duration-[180ms] shadow-raised">
                   ▶
                 </div>
               </div>
@@ -202,24 +207,67 @@ const CourseDetailPage = () => {
             <CurriculumAccordion sections={curriculum} />
           </div>
 
-          {/* What you'll build + Requirements */}
-          <div>
-            <h2 className="font-display font-semibold text-[22px] text-ink mb-[14px]">What you'll build</h2>
-            <div className="bg-paper border border-line rounded-md p-[18px] mb-[22px]">
-              <ul className="space-y-[11px]">
-                {[
-                  `${domain.glyph} A documented project from ${course.title.split(" ")[0].toLowerCase()} principles`,
-                  "◆ A portfolio-ready deliverable",
-                  "✎ A short case study you can share",
-                ].map((item) => (
-                  <li key={item} className="text-[13.5px] text-t2">{item}</li>
-                ))}
-              </ul>
+          {/* Instructor Card & Course Details */}
+          <div className="space-y-8">
+            {/* Course Stats / Details */}
+            <div>
+              <h2 className="font-display font-semibold text-[22px] text-ink mb-4">Course Info</h2>
+              <div className="bg-paper border border-line rounded-md p-[22px] space-y-4">
+                <div className="flex justify-between items-center text-[13.5px]">
+                  <span className="font-mono text-t3 uppercase tracking-wider text-[11px]">Domain</span>
+                  <span className="font-medium text-ink capitalize">{(course as any).domain?.toLowerCase() ?? "Code"}</span>
+                </div>
+                <div className="border-t border-line" />
+                <div className="flex justify-between items-center text-[13.5px]">
+                  <span className="font-mono text-t3 uppercase tracking-wider text-[11px]">Last Updated</span>
+                  <span className="font-medium text-ink">
+                    {new Date(course.updatedAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+                <div className="border-t border-line" />
+                <div className="flex justify-between items-center text-[13.5px]">
+                  <span className="font-mono text-t3 uppercase tracking-wider text-[11px]">Language</span>
+                  <span className="font-medium text-ink">English</span>
+                </div>
+                <div className="border-t border-line" />
+                <div className="flex justify-between items-center text-[13.5px]">
+                  <span className="font-mono text-t3 uppercase tracking-wider text-[11px]">Learning Mode</span>
+                  <span className="font-medium text-ink">Self-Paced</span>
+                </div>
+              </div>
             </div>
-            <h2 className="font-display font-semibold text-[22px] text-ink mb-[10px]">Requirements</h2>
-            <p className="text-[13.5px] text-t2 leading-[1.8]">
-              No prior background required. Bring curiosity and willingness to practice.
-            </p>
+
+            {/* Instructor Box */}
+            <div>
+              <h2 className="font-display font-semibold text-[22px] text-ink mb-4">Instructor</h2>
+              <div className="bg-paper border border-line rounded-md p-[22px]">
+                <div className="flex items-center gap-4 mb-4">
+                  {(course.instructor as any)?.avatar ? (
+                    <img
+                      src={(course.instructor as any).avatar}
+                      alt={(course.instructor as any).name}
+                      className="w-14 h-14 rounded-full object-cover border border-line"
+                    />
+                  ) : (
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-axiom to-d-design flex items-center justify-center text-white text-xl font-bold">
+                      {((course.instructor as any)?.name ?? "I").charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="font-body font-semibold text-[16px] text-ink">
+                      {(course.instructor as any)?.name ?? "Instructor"}
+                    </h3>
+                    <p className="font-mono text-[11px] text-t3 mt-0.5">Course Creator</p>
+                  </div>
+                </div>
+                <p className="text-[13.5px] text-t2 leading-relaxed">
+                  {(course.instructor as any)?.bio ?? "Expert instructor dedicated to providing high-quality, practical learning resources. Learn step-by-step with structured lessons and assignments."}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

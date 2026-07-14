@@ -17,6 +17,8 @@ const CoursesPage = () => {
 
   const { data: courses = [], isLoading, isError } = useCourses(searchQuery || undefined);
 
+  console.log(courses)
+
   const filtered = courses.filter((c) => {
     if (activeDomain === "All") return true;
     return (c as any).domain?.toUpperCase() === activeDomain.toUpperCase();

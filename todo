@@ -1,25 +1,7 @@
-User:
-- user signup:  name,email,password ✅
-- user login: email,password ✅
-- user update: avatar,phone,email,issuspended,bio ✅
-- user logout ✅
-
-Courses:
-- list courses: title,thumbnail,instructor name ✅
-- show course details: title, thumbnail, description, sections ✅
-- create course: title, description ✅
-- update course: title, description ✅
-- update thumbnail: thumbnail ✅
-- delete course ✅
-
-Sections:
-- create section: title, position, courseId ✅
-- update section: title, position ✅
-- delete section ✅
-
 Lectures:
 - create lecture: title,position,isPreview,courseId,sectionId and video details to create signed url
 - update lecture: title, posiiton, isPreview
 - delete lecture: delete documents + s3 object
 
 - create the frontend of what is completed so far
+- add course info like language, duration, domain, learning mode

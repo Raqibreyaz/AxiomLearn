@@ -28,7 +28,7 @@ const adminLinks: SidebarLink[] = [
 ];
 
 const accountLinks: SidebarLink[] = [
-  { icon: "⚙", label: "Settings", to: "#" },
+  { icon: "⚙", label: "Settings", to: "/dashboard/settings" },
 ];
 
 const DashboardSidebar = ({ variant = "student" }: DashboardSidebarProps) => {

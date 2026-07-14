@@ -42,12 +42,18 @@ const CourseCard = ({ course }: CourseCardProps) => {
     >
       <div className="bg-paper border border-line rounded-md overflow-hidden cursor-pointer transition-all duration-[180ms] hover:-translate-y-1 hover:border-t3 shadow-card">
 
-        {/* Thumbnail — 150px, domain gradient, tag top-left, glyph center */}
-        <div className={`${domain.thumbClass} h-[150px] relative flex items-center justify-center`}>
+        {/* Thumbnail — 150px */}
+        <div className="h-[150px] relative flex items-center justify-center overflow-hidden">
+          {course.thumbnail ? (
+            <img src={course.thumbnail} alt={course.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className={`${domain.thumbClass} absolute inset-0 flex items-center justify-center`}>
+              <span className="text-[30px] select-none" aria-hidden="true">{domain.glyph}</span>
+            </div>
+          )}
           <span className="absolute top-[10px] left-[10px] font-mono text-[10.5px] font-medium px-[9px] py-1 rounded-sm text-white bg-black/[0.32]">
             {domain.label}
           </span>
-          <span className="text-[30px] select-none" aria-hidden="true">{domain.glyph}</span>
         </div>
 
         {/* Body */}

@@ -15,6 +15,7 @@ import DashboardPage    from "./pages/DashboardPage";
 import CreateCoursePage from "./pages/CreateCoursePage";
 import EditCoursePage   from "./pages/EditCoursePage";
 import AdminPage        from "./pages/AdminPage";
+import SettingsPage     from "./pages/SettingsPage";
 
 /* Inner component so useAuth() runs inside QueryClientProvider */
 const AppRoutes = () => {
@@ -46,6 +47,9 @@ const AppRoutes = () => {
         } />
         <Route path="/dashboard/certificates" element={
           <ProtectedRoute><DashboardPage /></ProtectedRoute>
+        } />
+        <Route path="/dashboard/settings" element={
+          <ProtectedRoute><SettingsPage /></ProtectedRoute>
         } />
 
         {/* Instructor/Admin — course management */}

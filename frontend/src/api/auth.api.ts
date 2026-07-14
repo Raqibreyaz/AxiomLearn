@@ -7,6 +7,7 @@ export interface AuthUser {
   role: "owner" | "admin" | "instructor" | "student";
   avatar?: string;
   bio?: string;
+  phone?: string;
 }
 
 export interface SignupPayload {
@@ -18,6 +19,15 @@ export interface SignupPayload {
 export interface LoginPayload {
   email: string;
   password: string;
+}
+
+export interface UpdateProfilePayload {
+  name?: string;
+  email?: string;
+  phone?: string;
+  bio?: string;
+  password?: string;
+  newPassword?: string;
 }
 
 export const authApi = {
@@ -38,5 +48,16 @@ export const authApi = {
   getMe: async (): Promise<AuthUser> => {
     const { data } = await api.get("/auth/me");
     return data.data;
+  },
+
+  updateProfile: async (payload: UpdateProfilePayload): Promise<AuthUser> => {
+    const { data } = await api.patch("/auth/update", payload);
+    return data.data;
+  },
+
+  updateAvatar: async (file: File): Promise<void> => {
+    await api.post("/auth/avatar", file, {
+      headers: { "Content-Type": file.type },
+    });
   },
 };
