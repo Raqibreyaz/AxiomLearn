@@ -26,8 +26,8 @@ export const useAuth = () => {
   }, [data, queryLoading, setUser, clearUser, setInitialized]);
 
   const isAuthenticated = !!user;
-  const isInstructor = user?.role === "instructor" || user?.role === "admin" || user?.role === "owner";
-  const isAdmin = user?.role === "admin" || user?.role === "owner";
+  const isInstructor = user?.role === "instructor" || user?.role === "admin";
+  const isAdmin = user?.role === "admin";
 
   return {
     user,

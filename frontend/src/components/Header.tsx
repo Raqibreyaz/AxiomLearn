@@ -30,7 +30,7 @@ const Header = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const isAdmin = user?.role === "admin" || user?.role === "owner";
+  const isAdmin = user?.role === "admin";
 
   const logoutMutation = useMutation({
     mutationFn: authApi.logout,

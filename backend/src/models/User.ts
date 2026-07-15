@@ -6,7 +6,7 @@ export interface IUser extends Document {
   phone?: string;
   password?: string;
   avatar?: string;
-  role: "owner" | "admin" | "instructor" | "student";
+  role: "admin" | "instructor" | "student";
   isSuspended: boolean;
   bio?: string;
   createdAt: Date;
@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema<IUser>(
     avatar: { type: String },
     role: {
       type: String,
-      enum: ["owner", "admin", "instructor", "student"],
+      enum: ["admin", "instructor", "student"],
       required: true,
     },
     isSuspended: { type: Boolean, default: false },

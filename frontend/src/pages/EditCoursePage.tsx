@@ -120,9 +120,7 @@ const EditCoursePage = () => {
   const canEdit =
     user &&
     course &&
-    (user._id === course.instructor?._id ||
-      user.role === "admin" ||
-      user.role === "owner");
+    (user._id === course.instructor?._id || user.role === "admin");
 
   if (isLoading) return <LoadingSpinner fullScreen />;
 
@@ -1047,11 +1045,14 @@ const EditCoursePage = () => {
                                       accept="video/mp4,video/webm"
                                       className="hidden"
                                       onChange={(e) => {
-                                        const file = e.target.files?.[0] || null;
+                                        const file =
+                                          e.target.files?.[0] || null;
                                         setLectureFile(file);
                                         if (file && !lectureTitle.trim()) {
                                           // Default title to the file name without extension
-                                          setLectureTitle(file.name.replace(/\.[^/.]+$/, ""));
+                                          setLectureTitle(
+                                            file.name.replace(/\.[^/.]+$/, ""),
+                                          );
                                         }
                                       }}
                                     />

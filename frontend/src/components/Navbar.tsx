@@ -12,7 +12,7 @@ const Navbar = () => {
   const location = useLocation();
   const queryClient = useQueryClient();
 
-  const isInstructor = user?.role === "instructor" || user?.role === "admin" || user?.role === "owner";
+  const isInstructor = user?.role === "instructor" || user?.role === "admin";
 
   const logoutMutation = useMutation({
     mutationFn: authApi.logout,

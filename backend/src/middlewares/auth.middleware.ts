@@ -50,7 +50,7 @@ export const verifySession = async (
   }
 };
 
-type UserRole = "owner" | "admin" | "instructor" | "student";
+type UserRole = "admin" | "instructor" | "student";
 
 // Check if authenticated user has one of the allowed roles
 export const authorizeRoles = (...allowedRoles: UserRole[]) => {

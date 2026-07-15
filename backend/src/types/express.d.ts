@@ -7,7 +7,7 @@ export interface AuthenticatedUser {
   email: string;
   phone?: string;
   avatar?: string;
-  role: "owner" | "admin" | "instructor" | "student";
+  role: "admin" | "instructor" | "student";
   isSuspended: boolean;
   bio?: string;
   createdAt: Date;

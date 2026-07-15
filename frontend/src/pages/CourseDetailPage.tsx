@@ -42,16 +42,11 @@ const CourseDetailPage = () => {
   const { data: course, isLoading, isError } = useCourse(id!);
 
   const isInstructor =
-    user &&
-    (user.role === "instructor" ||
-      user.role === "admin" ||
-      user.role === "owner");
+    user && (user.role === "instructor" || user.role === "admin");
   const canEdit =
     isInstructor &&
     course &&
-    (user._id === course.instructor?._id ||
-      user.role === "admin" ||
-      user.role === "owner");
+    (user._id === course.instructor?._id || user.role === "admin");
 
   if (isLoading) return <LoadingSpinner fullScreen />;
   if (isError || !course) {
@@ -316,9 +311,13 @@ const CourseDetailPage = () => {
                   {totalHours ? ` · ${totalHours}` : ""}
                 </p>
                 {curriculum.length > 0 ? (
-                  <CurriculumAccordion 
-                    sections={curriculum} 
-                    onLessonSelect={(lesson) => navigate(`/courses/${course._id}/learn?lesson=${lesson.id}`)}
+                  <CurriculumAccordion
+                    sections={curriculum}
+                    onLessonSelect={(lesson) =>
+                      navigate(
+                        `/courses/${course._id}/learn?lesson=${lesson.id}`,
+                      )
+                    }
                   />
                 ) : (
                   <div className="border border-dashed border-line rounded-md py-8 text-center">
