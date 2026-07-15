@@ -5,10 +5,10 @@ import {
   deleteLecture,
 } from "../controllers/lecture.controllers.js";
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 // Protected routes (Admin and Instructor only)
-router.post("/:courseId/:sectionId", createLecture);
+router.post("/", createLecture);
 
 router.patch("/:lectureId", updateLecture);
 

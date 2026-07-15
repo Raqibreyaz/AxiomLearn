@@ -35,6 +35,7 @@ export interface Section {
   _id: string;
   title: string;
   position: number;
+  lectures?: Lecture[];
   createdAt: string;
   updatedAt: string;
 }
@@ -47,7 +48,8 @@ export interface Lecture {
   course: string;
   section: string;
   lectureDurationSeconds: number;
-  uploadStatus: "uploaded" | "processing" | "ready" | "failed";
+  sizeInBytes?: number;
+  isUploading?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -96,14 +98,16 @@ export interface CreateLecturePayload {
   title: string;
   position: number;
   isPreview?: boolean;
-  lectureDurationSeconds: number;
-  uploadStatus: "uploaded" | "processing" | "ready" | "failed";
+  fileType: string;
+  fileSize: number;
+  duration: number;
 }
 
 export interface UpdateLecturePayload {
   title?: string;
   position?: number;
   isPreview?: boolean;
+  isUploading?: boolean;
 }
 
 /* ══════════════════════════════════════════════════
@@ -178,9 +182,9 @@ export const lecturesApi = {
     courseId: string,
     sectionId: string,
     payload: CreateLecturePayload,
-  ): Promise<Lecture> => {
+  ): Promise<{ lecture: Lecture; uploadUrl: string }> => {
     const { data } = await api.post(
-      `/courses/${courseId}/sections/${sectionId}/lectures/${courseId}/${sectionId}`,
+      `/courses/${courseId}/sections/${sectionId}/lectures`,
       payload,
     );
     return data.data;

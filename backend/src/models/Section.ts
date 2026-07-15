@@ -10,8 +10,8 @@ export interface ISection extends Document {
 
 const sectionSchema = new mongoose.Schema<ISection>(
   {
-    title: { type: String, required: true },
-    position: { type: Number, required: true },
+    title: { type: String, required: true, trim: true },
+    position: { type: Number, required: true, min: 0 },
     course: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
@@ -20,6 +20,8 @@ const sectionSchema = new mongoose.Schema<ISection>(
   },
   { timestamps: true },
 );
+
+sectionSchema.index({ course: 1, position: 1 }, { unique: true });
 
 export const Section = mongoose.model<ISection>("Section", sectionSchema);
 export default Section;

@@ -1,1 +1,5 @@
 - for creating a public r2 bucket, create a public development url or add a custom public domain, then we can access the object directly as, "[public_url]/[object_key]"
+
+- MongoDB text indexes treat a field named language as a special language override field by default. So if your document has language "en-US" or any app locale, MongoDB may throw language override unsupported. Fix it by changing the index’s language_override to another field name, or by setting a supported text-language value. Also remember to drop and recreate the old text index after changing the schema.
+
+- upload was getting freezed on some percent, r2 was not accepting the data, few hours of spent time concluded a tiny mistake, the new bucket was not configured with the api token

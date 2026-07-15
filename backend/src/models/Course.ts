@@ -134,7 +134,10 @@ courseSchema.pre("validate", async function () {
 
 courseSchema.index({ domain: 1, level: 1 });
 courseSchema.index({ status: 1, isFeatured: 1 });
-courseSchema.index({ title: "text", shortDescription: "text", tags: "text" });
+courseSchema.index(
+  { title: "text", shortDescription: "text", tags: "text" },
+  { language_override: "textSearchLanguage" }
+);
 
 export const Course = mongoose.model<ICourse>("Course", courseSchema);
 export default Course;

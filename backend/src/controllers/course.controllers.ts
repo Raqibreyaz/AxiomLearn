@@ -71,12 +71,25 @@ export const getCourseById = async (req: Request, res: Response) => {
     .sort({ position: 1 })
     .lean();
 
+  const lectures = await Lecture.find({ course: course._id })
+    .select("-course")
+    .sort({ position: 1 })
+    .lean();
+
+  // Attach lectures to their respective sections
+  const sectionsWithLectures = sections.map((sec) => ({
+    ...sec,
+    lectures: lectures.filter(
+      (lec) => lec.section.toString() === sec._id.toString(),
+    ),
+  }));
+
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        { ...course, sections },
+        { ...course, sections: sectionsWithLectures },
         "Course details retrieved successfully",
       ),
     );

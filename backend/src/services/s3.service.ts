@@ -61,16 +61,21 @@ export const deleteFile = async (s3ObjectUrl: string) => {
 export const uploadFilePresignedUrl = async (
   objectKey: string,
   contentType: string,
-  contentLength: number,
+  _contentLength: number,
 ) => {
   const putObjectCommand = new PutObjectCommand({
     Bucket: R2_TEMP_BUCKET,
     Key: objectKey,
     ContentType: contentType,
-    ContentLength: contentLength,
+    // NOTE: Do NOT include ContentLength here.
+    // When the browser sends a PUT via XMLHttpRequest (axios), the
+    // Content-Length header it sends may differ from the signed value
+    // (e.g. due to chunked encoding or rounding), causing R2/S3 to
+    // reject the request with a SignatureDoesNotMatch error.
   });
 
-  return await getSignedUrl(s3, putObjectCommand, { expiresIn: 60 });
+  // 30 minutes — enough time for large video uploads on slow connections
+  return await getSignedUrl(s3, putObjectCommand, { expiresIn: 1800 });
 };
 
 export const getFilePresignedUrl = async (objectKey: string) => {
