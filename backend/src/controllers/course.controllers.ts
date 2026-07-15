@@ -10,6 +10,7 @@ import { uploadFile, deleteFile } from "../services/s3.service.js";
 import { rm } from "node:fs/promises";
 import { createCourseSchema, updateCourseSchema } from "../schemas/course.schemas.js";
 import * as z from "zod";
+import { CourseParams } from "../types/params.js";
 
 // @desc    Get all courses
 // @route   GET /api/v1/courses
@@ -54,7 +55,10 @@ export const getCourses = async (req: Request, res: Response) => {
 // @desc    Get course by ID
 // @route   GET /api/v1/courses/:id
 // @access  Public
-export const getCourseById = async (req: Request, res: Response) => {
+export const getCourseById = async (
+  req: Request<CourseParams>,
+  res: Response,
+) => {
   const { courseId } = req.params;
 
   const course = await Course.findById(courseId)
@@ -139,7 +143,7 @@ export const createCourse = async (
 // @route   PATCH /api/v1/courses/:id
 // @access  Private (Instructor/Admin)
 export const updateCourse = async (
-  req: Request<{ courseId: string }, any, z.infer<typeof updateCourseSchema>>,
+  req: Request<CourseParams, any, z.infer<typeof updateCourseSchema>>,
   res: Response,
 ) => {
   const { courseId } = req.params;
@@ -167,7 +171,10 @@ export const updateCourse = async (
 // @desc    Update course thumbnail
 // @route   POST /api/v1/courses/:id/thumbnail
 // @access  Private (Instructor/Admin)
-export const updateThumbnail = async (req: Request, res: Response) => {
+export const updateThumbnail = async (
+  req: Request<CourseParams>,
+  res: Response,
+) => {
   const { courseId } = req.params;
   const course = await Course.findById(courseId);
 
@@ -209,7 +216,10 @@ export const updateThumbnail = async (req: Request, res: Response) => {
 // @desc    delete entire course
 // @route   DELETE /api/v1/courses/:id
 // @access  Private (Instructor/Admin)
-export const deleteCourse = async (req: Request, res: Response) => {
+export const deleteCourse = async (
+  req: Request<CourseParams>,
+  res: Response,
+) => {
   const { courseId } = req.params;
 
   const course = await Course.findById(courseId);

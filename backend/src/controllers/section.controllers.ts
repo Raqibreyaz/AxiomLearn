@@ -7,9 +7,10 @@ import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiResponse.js";
 import { createSectionSchema, updateSectionSchema } from "../schemas/section.schemas.js";
 import * as z from "zod";
+import { CourseParams, SectionParams } from "../types/params.js";
 
 export const createSection = async (
-  req: Request<{ courseId: string }, any, z.infer<typeof createSectionSchema>>,
+  req: Request<CourseParams, any, z.infer<typeof createSectionSchema>>,
   res: Response,
 ) => {
   const { courseId } = req.params;
@@ -32,7 +33,7 @@ export const createSection = async (
 };
 
 export const updateSection = async (
-  req: Request<{ sectionId: string }, any, z.infer<typeof updateSectionSchema>>,
+  req: Request<SectionParams, any, z.infer<typeof updateSectionSchema>>,
   res: Response,
 ) => {
   const { sectionId } = req.params;
@@ -59,7 +60,10 @@ export const updateSection = async (
 };
 
 // TODO: delete lectures from s3 as well
-export const deleteSection = async (req: Request, res: Response) => {
+export const deleteSection = async (
+  req: Request<SectionParams>,
+  res: Response,
+) => {
   const { sectionId } = req.params;
 
   const section = await Section.findById(sectionId);

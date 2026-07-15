@@ -86,3 +86,9 @@ export const getFilePresignedUrl = async (objectKey: string) => {
 
   return await getSignedUrl(s3, getObjectCommand, { expiresIn: 5 * 60 });
 };
+
+export const deleteLectureVideo = async (objectKey: string) => {
+  await s3.send(
+    new DeleteObjectCommand({ Bucket: R2_TEMP_BUCKET, Key: objectKey }),
+  );
+};

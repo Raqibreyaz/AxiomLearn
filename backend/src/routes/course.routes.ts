@@ -16,11 +16,15 @@ import upload from "../middlewares/upload.middleware.js";
 import sectionRouter from "./section.routes.js";
 import inputValidate from "../middlewares/inputValidate.middleware.js";
 import { createCourseSchema, updateCourseSchema } from "../schemas/course.schemas.js";
+import validateObjectIds from "../middlewares/validateObjectId.middleware.js";
 
 const router = Router({ mergeParams: true });
 
 // Public routes
 router.get("/", getCourses);
+
+router.use("/:courseId", validateObjectIds);
+
 router.get("/:courseId", getCourseById);
 
 // src/routes/course.routes.ts

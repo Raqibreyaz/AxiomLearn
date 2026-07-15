@@ -7,10 +7,13 @@ import {
 import lectureRouter from "./lecture.routes.js";
 import inputValidate from "../middlewares/inputValidate.middleware.js";
 import { createSectionSchema, updateSectionSchema } from "../schemas/section.schemas.js";
+import validateObjectIds from "../middlewares/validateObjectId.middleware.js";
 
 const router = Router({ mergeParams: true });
 
 // Protected routes (Admin and Instructor only)
+router.use("/:sectionId", validateObjectIds);
+
 router.use("/:sectionId/lectures", lectureRouter);
 
 router.post("/", inputValidate(createSectionSchema), createSection);

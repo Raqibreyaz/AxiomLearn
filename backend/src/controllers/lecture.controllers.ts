@@ -1,12 +1,20 @@
 import { ObjectId } from "mongodb";
 import { Request, Response } from "express";
-import { getFilePresignedUrl, uploadFilePresignedUrl } from "../services/s3.service.js";
+import {
+  deleteLectureVideo,
+  getFilePresignedUrl,
+  uploadFilePresignedUrl,
+} from "../services/s3.service.js";
 import Lecture from "../models/Lecture.js";
 import Section from "../models/Section.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiResponse.js";
-import { createLectureSchema, updateLectureSchema } from "../schemas/lecture.schemas.js";
+import {
+  createLectureSchema,
+  updateLectureSchema,
+} from "../schemas/lecture.schemas.js";
 import * as z from "zod";
+import { SectionParams, LectureParams } from "../types/params.js";
 
 const isDuplicateKeyError = (error: unknown) =>
   typeof error === "object" &&
@@ -15,7 +23,7 @@ const isDuplicateKeyError = (error: unknown) =>
   error.code === 11000;
 
 export const createLecture = async (
-  req: Request<{ courseId: string; sectionId: string }, any, z.infer<typeof createLectureSchema>>,
+  req: Request<SectionParams, any, z.infer<typeof createLectureSchema>>,
   res: Response,
 ) => {
   const courseId = req.params["courseId"]!;
@@ -94,7 +102,11 @@ export const createLecture = async (
 
 // for upload complete, this will be used to set isUploading:false
 export const updateLecture = async (
-  req: Request<{ courseId: string; sectionId: string; lectureId: string }, any, z.infer<typeof updateLectureSchema>>,
+  req: Request<
+    LectureParams,
+    any,
+    z.infer<typeof updateLectureSchema>
+  >,
   res: Response,
 ) => {
   const courseId = req.params["courseId"]!;
@@ -110,7 +122,7 @@ export const updateLecture = async (
   const lecture = await Lecture.findOneAndUpdate(
     { _id: lectureId, section: sectionId, course: courseId },
     { title, position, isPreview, isUploading },
-    { returnDocument: "after", runValidators: true }
+    { returnDocument: "after", runValidators: true },
   );
 
   if (!lecture) {
@@ -122,7 +134,10 @@ export const updateLecture = async (
     .json(new ApiResponse(200, { lecture }, "Lecture updated successfully"));
 };
 
-export const deleteLecture = async (req: Request, res: Response) => {
+export const deleteLecture = async (
+  req: Request<LectureParams>,
+  res: Response,
+) => {
   const courseId = req.params["courseId"]!;
   const sectionId = req.params["sectionId"]!;
   const lectureId = req.params["lectureId"]!;
@@ -141,12 +156,17 @@ export const deleteLecture = async (req: Request, res: Response) => {
     throw new ApiError(404, "Lecture not found");
   }
 
+  await deleteLectureVideo(lectureId);
+
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "Lecture deleted successfully"));
 };
 
-export const getLectureStreamUrl = async (req: Request, res: Response) => {
+export const getLectureStreamUrl = async (
+  req: Request<LectureParams>,
+  res: Response,
+) => {
   const courseId = req.params["courseId"]!;
   const sectionId = req.params["sectionId"]!;
   const lectureId = req.params["lectureId"]!;
@@ -167,11 +187,17 @@ export const getLectureStreamUrl = async (req: Request, res: Response) => {
 
   // TODO: Add authorization checks (e.g., is user enrolled? is it a free preview?)
   // For now, if the lecture exists, we grant the stream URL.
-  
+
   // the lecture ID is the object key
   const streamUrl = await getFilePresignedUrl(lecture._id.toString());
 
   return res
     .status(200)
-    .json(new ApiResponse(200, { url: streamUrl }, "Stream URL generated successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        { url: streamUrl },
+        "Stream URL generated successfully",
+      ),
+    );
 };
