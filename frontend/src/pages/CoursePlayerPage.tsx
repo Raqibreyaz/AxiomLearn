@@ -10,6 +10,12 @@ import CurriculumAccordion, {
 import LoadingSpinner from "../components/LoadingSpinner";
 import Button from "../components/Button";
 
+import '@vidstack/react/player/styles/default/theme.css';
+import '@vidstack/react/player/styles/default/layouts/video.css';
+import '../vidstack-theme.css'; // Add our custom glassmorphism theme
+
+import { MediaPlayer, MediaProvider } from '@vidstack/react';
+import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/layouts/default';
 
 const CoursePlayerPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -148,13 +154,17 @@ const CoursePlayerPage = () => {
                 Loading video...
               </div>
             ) : activeLesson && streamUrl ? (
-              <video
-                key={activeLesson.id}
-                src={streamUrl}
-                controls
+              <MediaPlayer 
+                key={activeLesson.id} 
+                src={streamUrl} 
                 autoPlay
-                className="w-full h-full object-contain absolute inset-0"
-              />
+                playsInline
+                className="w-full h-full absolute inset-0 z-0 bg-black"
+                crossOrigin
+              >
+                <MediaProvider />
+                <DefaultVideoLayout icons={defaultLayoutIcons} />
+              </MediaPlayer>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-ti3 text-[14px]">
                 No lesson selected or failed to load.

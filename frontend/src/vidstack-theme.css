@@ -1,0 +1,47 @@
+/* Vidstack Custom Theme - AxiomLearn Aesthetics */
+
+/* We target the media-player custom element provided by Vidstack */
+media-player {
+  /* Use our brand colors for the progress bar and volume slider */
+  --media-brand: var(--color-axiom);
+  
+  /* Apply our custom fonts */
+  --media-font-family: var(--font-body);
+  
+  /* Make the controls background a sleek frosted glass */
+  --media-controls-bg: rgba(15, 25, 48, 0.4); /* Ink sunken color with transparency */
+  --media-tooltip-bg: rgba(255, 255, 255, 0.9);
+  --media-tooltip-text: var(--color-ink);
+  
+  /* Enhance the focus ring to match AxiomLearn */
+  --media-focus-ring: 2px solid var(--color-axiom);
+}
+
+/* Override the default control bar layout for glassmorphism */
+media-player [data-media-controls] {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  backdrop-filter: blur(8px); /* The frosted glass effect */
+  -webkit-backdrop-filter: blur(8px);
+  padding: 12px 16px;
+  border-top-left-radius: var(--radius-lg);
+  border-top-right-radius: var(--radius-lg);
+}
+
+/* Big play button centered in the screen */
+media-player [data-media-play-button] {
+  background-color: var(--color-axiom);
+  border-radius: 50%;
+  color: white;
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+media-player [data-media-play-button]:hover {
+  transform: scale(1.05);
+  background-color: var(--color-axiom-hover);
+}
+
+/* Adjust the sliders to match our sleek UI */
+media-player media-slider {
+  --media-slider-track-bg: rgba(255, 255, 255, 0.3);
+  --media-slider-track-fill-bg: var(--color-axiom);
+  --media-slider-thumb-bg: white;
+}
