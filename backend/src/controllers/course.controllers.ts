@@ -35,10 +35,7 @@ export const getCourses = async (req: Request, res: Response) => {
   } else if (!req.user || req.user.role === "student") {
     query.status = "published";
   } else if (req.user.role === "instructor") {
-    query.$or = [
-      { status: "published" },
-      { instructor: req.user._id },
-    ];
+    query.$or = [{ status: "published" }, { instructor: req.user._id }];
   }
 
   const courses = await Course.find(query)
@@ -115,7 +112,10 @@ export const createCourse = async (req: Request, res: Response) => {
   if (!req.user) throw new ApiError(401, "User must be authorized first!");
 
   if (!title || !description || !shortDescription || !domain) {
-    throw new ApiError(400, "Title, description, shortDescription, and domain are required");
+    throw new ApiError(
+      400,
+      "Title, description, shortDescription, and domain are required",
+    );
   }
 
   const course = await Course.create({
@@ -142,7 +142,7 @@ export const createCourse = async (req: Request, res: Response) => {
 // @access  Private (Instructor/Admin)
 export const updateCourse = async (req: Request, res: Response) => {
   const { courseId } = req.params;
-  const course = req.course || await Course.findById(courseId);
+  const course = req.course || (await Course.findById(courseId));
 
   if (!course) {
     throw new ApiError(404, "Course not found");
@@ -155,7 +155,7 @@ export const updateCourse = async (req: Request, res: Response) => {
   const updatedCourse = await Course.findByIdAndUpdate(
     course._id,
     { $set: req.body },
-    { new: true, runValidators: true },
+    { returnDocument: "after", runValidators: true },
   );
 
   return res

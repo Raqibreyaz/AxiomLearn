@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { Request, Response } from "express";
-import { uploadFilePresignedUrl } from "../services/s3.service.js";
+import { getFilePresignedUrl, uploadFilePresignedUrl } from "../services/s3.service.js";
 import Lecture from "../models/Lecture.js";
 import Section from "../models/Section.js";
 import ApiError from "../utils/apiError.js";
@@ -102,7 +102,7 @@ export const updateLecture = async (req: Request, res: Response) => {
   const lecture = await Lecture.findOneAndUpdate(
     { _id: lectureId, section: sectionId, course: courseId },
     { title, position, isPreview, isUploading },
-    { new: true, runValidators: true }
+    { returnDocument: "after", runValidators: true }
   );
 
   if (!lecture) {
@@ -136,4 +136,34 @@ export const deleteLecture = async (req: Request, res: Response) => {
   return res
     .status(200)
     .json(new ApiResponse(200, {}, "Lecture deleted successfully"));
+};
+
+export const getLectureStreamUrl = async (req: Request, res: Response) => {
+  const courseId = req.params["courseId"]!;
+  const sectionId = req.params["sectionId"]!;
+  const lectureId = req.params["lectureId"]!;
+
+  if (!courseId || !sectionId || !lectureId) {
+    throw new ApiError(400, "courseId, sectionId, and lectureId are required");
+  }
+
+  const lecture = await Lecture.findOne({
+    _id: lectureId,
+    section: sectionId,
+    course: courseId,
+  });
+
+  if (!lecture) {
+    throw new ApiError(404, "Lecture not found");
+  }
+
+  // TODO: Add authorization checks (e.g., is user enrolled? is it a free preview?)
+  // For now, if the lecture exists, we grant the stream URL.
+  
+  // the lecture ID is the object key
+  const streamUrl = await getFilePresignedUrl(lecture._id.toString());
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { url: streamUrl }, "Stream URL generated successfully"));
 };

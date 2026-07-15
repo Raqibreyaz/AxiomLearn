@@ -3,7 +3,7 @@ import api from "./axios";
 export interface Course {
   _id: string;
   title: string;
-  slug?: string;
+
   description: string;
   shortDescription?: string;
   thumbnail?: string;
@@ -211,5 +211,16 @@ export const lecturesApi = {
     await api.delete(
       `/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}`,
     );
+  },
+
+  getLectureStreamUrl: async (
+    courseId: string,
+    sectionId: string,
+    lectureId: string,
+  ): Promise<string> => {
+    const { data } = await api.get(
+      `/courses/${courseId}/sections/${sectionId}/lectures/${lectureId}/stream-url`
+    );
+    return data.data.url;
   },
 };

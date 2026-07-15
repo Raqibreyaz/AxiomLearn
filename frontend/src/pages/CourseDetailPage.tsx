@@ -1,4 +1,4 @@
-/* /courses/[slug] or /courses/:id
+/* /courses/:id
    Spec: CourseHero, PlayerCard + BuyBox §8, CurriculumAccordion §9, IncludesBox */
 
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -120,7 +120,7 @@ const CourseDetailPage = () => {
               Courses
             </Link>
             <span className="text-ti3/50">/</span>
-            <span className="text-ti2 font-medium">{course.slug ?? id}</span>
+            <span className="text-ti2 font-medium">{id}</span>
           </nav>
 
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10 items-start">
@@ -316,7 +316,10 @@ const CourseDetailPage = () => {
                   {totalHours ? ` · ${totalHours}` : ""}
                 </p>
                 {curriculum.length > 0 ? (
-                  <CurriculumAccordion sections={curriculum} />
+                  <CurriculumAccordion 
+                    sections={curriculum} 
+                    onLessonSelect={(lesson) => navigate(`/courses/${course._id}/learn?lesson=${lesson.id}`)}
+                  />
                 ) : (
                   <div className="border border-dashed border-line rounded-md py-8 text-center">
                     <p className="text-[13.5px] text-t3">

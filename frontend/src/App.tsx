@@ -9,6 +9,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import LandingPage      from "./pages/LandingPage";
 import CoursesPage      from "./pages/CoursesPage";
 import CourseDetailPage from "./pages/CourseDetailPage";
+import CoursePlayerPage   from "./pages/CoursePlayerPage";
 import LoginPage        from "./pages/LoginPage";
 import SignupPage       from "./pages/SignupPage";
 import DashboardPage    from "./pages/DashboardPage";
@@ -33,6 +34,7 @@ const AppRoutes = () => {
         <Route path="/"                  element={<LandingPage />} />
         <Route path="/courses"           element={<CoursesPage />} />
         <Route path="/courses/:id"       element={<CourseDetailPage />} />
+        <Route path="/courses/:id/learn" element={<CoursePlayerPage />} />
 
         {/* Auth — redirect if already logged in */}
         <Route path="/login"  element={<LoginPage />} />

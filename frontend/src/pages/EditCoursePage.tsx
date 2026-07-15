@@ -499,7 +499,7 @@ const EditCoursePage = () => {
                 to={`/courses/${id}`}
                 className="hover:text-ink transition-colors"
               >
-                {course.slug ?? id}
+                {id}
               </Link>
               <span>/</span>
               <span className="text-ink font-medium">Edit</span>
