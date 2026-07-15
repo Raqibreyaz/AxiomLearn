@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import apiRouter from "./routes/index.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
@@ -7,6 +8,7 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 const app = express();
 
 // Middlewares
+app.use(helmet());
 app.use(
   cors({
     origin: process.env["CORS_ORIGIN"] || "*",
