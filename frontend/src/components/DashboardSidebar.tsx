@@ -25,6 +25,7 @@ const adminLinks: SidebarLink[] = [
   { icon: "▦", label: "Overview",     to: "/admin" },
   { icon: "▤", label: "Courses",      to: "/admin/courses" },
   { icon: "◍", label: "Students",     to: "/admin/students" },
+  { icon: "🎓", label: "Instructors", to: "/admin/instructors" },
 ];
 
 const accountLinks: SidebarLink[] = [

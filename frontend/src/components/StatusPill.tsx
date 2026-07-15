@@ -1,6 +1,6 @@
 /* Spec §14 — Status Pill */
 
-type PillStatus = "success" | "warning" | "danger";
+type PillStatus = "success" | "warning" | "danger" | "info" | "default";
 
 interface StatusPillProps {
   status: PillStatus;
@@ -11,6 +11,8 @@ const statusClasses: Record<PillStatus, string> = {
   success: "bg-success-tint text-success",
   warning: "bg-[#F6EBD3] text-gold",
   danger:  "bg-danger-tint text-danger",
+  info: "bg-axiom-tint text-axiom",
+  default: "bg-line text-t2",
 };
 
 const StatusPill = ({ status, label }: StatusPillProps) => (

@@ -16,6 +16,7 @@ import DashboardPage from "./pages/DashboardPage";
 import CreateCoursePage from "./pages/CreateCoursePage";
 import EditCoursePage from "./pages/EditCoursePage";
 import AdminPage from "./pages/AdminPage";
+import AdminUsersPage from "./pages/AdminUsersPage";
 import SettingsPage from "./pages/SettingsPage";
 
 /* Inner component so useAuth() runs inside QueryClientProvider */
@@ -113,7 +114,15 @@ const AppRoutes = () => {
           path="/admin/students"
           element={
             <RoleRoute roles={["admin"]}>
-              <AdminPage />
+              <AdminUsersPage roleFilter="student" />
+            </RoleRoute>
+          }
+        />
+        <Route
+          path="/admin/instructors"
+          element={
+            <RoleRoute roles={["admin"]}>
+              <AdminUsersPage roleFilter="instructor" />
             </RoleRoute>
           }
         />

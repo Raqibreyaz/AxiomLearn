@@ -60,4 +60,14 @@ export const authApi = {
       headers: { "Content-Type": file.type },
     });
   },
+
+  getUsers: async (): Promise<AuthUser[]> => {
+    const { data } = await api.get("/auth/users");
+    return data.data;
+  },
+
+  updateRole: async (userId: string, role: "instructor" | "student"): Promise<AuthUser> => {
+    const { data } = await api.patch(`/auth/users/${userId}/role`, { role });
+    return data.data;
+  },
 };
