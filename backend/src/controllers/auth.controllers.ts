@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import User from "../models/User.js";
 import Session from "../models/Session.js";
@@ -8,15 +7,17 @@ import { createSession } from "../helpers/create-session.js";
 import { cookieOptions } from "../config/session.js";
 import { deleteFile, uploadFile } from "../services/s3.service.js";
 import { rm } from "node:fs/promises";
+import { signupSchema, loginSchema, updateProfileSchema } from "../schemas/auth.schemas.js";
+import * as z from "zod";
 
 // @desc    Register a new user
 // @route   POST /api/v1/auth/signup
 // @access  Public
-export const signup = async (req: Request, res: Response) => {
+export const signup = async (
+  req: Request<{}, any, z.infer<typeof signupSchema>>,
+  res: Response,
+) => {
   const { name, email, password } = req.body;
-  if (!name || !email || !password) {
-    throw new ApiError(400, "All fields are required");
-  }
 
   const existingUser = await User.findOne({ email });
 
@@ -24,15 +25,11 @@ export const signup = async (req: Request, res: Response) => {
     throw new ApiError(409, "User with this email already exists");
   }
 
-  // Hash password
-  const salt = await bcrypt.genSalt(10);
-  const passwordHash = await bcrypt.hash(password, salt);
-
   // Create User
   const user = await User.create({
     name,
     email,
-    password: passwordHash,
+    password,
     role: "student",
     isSuspended: false,
   });
@@ -61,12 +58,11 @@ export const signup = async (req: Request, res: Response) => {
 // @desc    Login user
 // @route   POST /api/v1/auth/login
 // @access  Public
-export const login = async (req: Request, res: Response) => {
+export const login = async (
+  req: Request<{}, any, z.infer<typeof loginSchema>>,
+  res: Response,
+) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    throw new ApiError(400, "Email and password are required");
-  }
 
   const user = await User.findOne({ email });
 
@@ -78,7 +74,7 @@ export const login = async (req: Request, res: Response) => {
     throw new ApiError(403, "Your account is suspended");
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  const isPasswordValid = await user.comparePassword(password);
 
   if (!isPasswordValid) {
     throw new ApiError(401, "Invalid user credentials");
@@ -108,7 +104,10 @@ export const login = async (req: Request, res: Response) => {
 // @desc    update user
 // @route   PATCH /api/v1/auth/update
 // @access  Private
-export const update = async (req: Request, res: Response) => {
+export const update = async (
+  req: Request<{}, any, z.infer<typeof updateProfileSchema>>,
+  res: Response,
+) => {
   const { name, email, phone, newPassword, password, bio } = req.body;
 
   const user = req.user ? await User.findById(req.user._id) : null;
@@ -118,22 +117,12 @@ export const update = async (req: Request, res: Response) => {
 
   // Handle password update if newPassword is provided
   if (newPassword) {
-    if (!password) {
-      throw new ApiError(
-        400,
-        "Current password is required to update password",
-      );
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password || "");
+    const isPasswordValid = await user.comparePassword(password || "");
     if (!isPasswordValid) {
       throw new ApiError(401, "Invalid current password");
     }
 
-    // Hash the new password
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(newPassword, salt);
-    user.password = passwordHash;
+    user.password = newPassword;
   }
 
   // Handle email uniqueness check if changing email

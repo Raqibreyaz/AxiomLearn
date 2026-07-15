@@ -5,14 +5,15 @@ import Lecture from "../models/Lecture.js";
 import LectureProgress from "../models/LectureProgress.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiResponse.js";
+import { createSectionSchema, updateSectionSchema } from "../schemas/section.schemas.js";
+import * as z from "zod";
 
-export const createSection = async (req: Request, res: Response) => {
+export const createSection = async (
+  req: Request<{ courseId: string }, any, z.infer<typeof createSectionSchema>>,
+  res: Response,
+) => {
   const { courseId } = req.params;
   const { title, position } = req.body;
-
-  if (!title || position === undefined) {
-    throw new ApiError(400, "Title and position are required");
-  }
 
   const course = await Course.findById(courseId);
   if (!course) {
@@ -30,7 +31,10 @@ export const createSection = async (req: Request, res: Response) => {
     .json(new ApiResponse(201, section, "Section created successfully"));
 };
 
-export const updateSection = async (req: Request, res: Response) => {
+export const updateSection = async (
+  req: Request<{ sectionId: string }, any, z.infer<typeof updateSectionSchema>>,
+  res: Response,
+) => {
   const { sectionId } = req.params;
   const { title, position } = req.body;
 

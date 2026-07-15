@@ -5,6 +5,8 @@ import Lecture from "../models/Lecture.js";
 import Section from "../models/Section.js";
 import ApiError from "../utils/apiError.js";
 import ApiResponse from "../utils/apiResponse.js";
+import { createLectureSchema, updateLectureSchema } from "../schemas/lecture.schemas.js";
+import * as z from "zod";
 
 const isDuplicateKeyError = (error: unknown) =>
   typeof error === "object" &&
@@ -12,7 +14,10 @@ const isDuplicateKeyError = (error: unknown) =>
   "code" in error &&
   error.code === 11000;
 
-export const createLecture = async (req: Request, res: Response) => {
+export const createLecture = async (
+  req: Request<{ courseId: string; sectionId: string }, any, z.infer<typeof createLectureSchema>>,
+  res: Response,
+) => {
   const courseId = req.params["courseId"]!;
   const sectionId = req.params["sectionId"]!;
 
@@ -58,8 +63,8 @@ export const createLecture = async (req: Request, res: Response) => {
       _id: lectureId,
       title: title.trim(),
       position,
-      course: courseId as any,
-      section: sectionId as any,
+      course: courseId,
+      section: sectionId,
       isPreview,
       lectureDurationSeconds: duration,
       sizeInBytes: fileSize,
@@ -88,7 +93,10 @@ export const createLecture = async (req: Request, res: Response) => {
 };
 
 // for upload complete, this will be used to set isUploading:false
-export const updateLecture = async (req: Request, res: Response) => {
+export const updateLecture = async (
+  req: Request<{ courseId: string; sectionId: string; lectureId: string }, any, z.infer<typeof updateLectureSchema>>,
+  res: Response,
+) => {
   const courseId = req.params["courseId"]!;
   const sectionId = req.params["sectionId"]!;
   const lectureId = req.params["lectureId"]!;

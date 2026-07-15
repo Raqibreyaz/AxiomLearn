@@ -5,13 +5,15 @@ import {
   deleteLecture,
   getLectureStreamUrl,
 } from "../controllers/lecture.controllers.js";
+import inputValidate from "../middlewares/inputValidate.middleware.js";
+import { createLectureSchema, updateLectureSchema } from "../schemas/lecture.schemas.js";
 
 const router = Router({ mergeParams: true });
 
 // Protected routes (Admin and Instructor only)
-router.post("/", createLecture);
+router.post("/", inputValidate(createLectureSchema), createLecture);
 
-router.patch("/:lectureId", updateLecture);
+router.patch("/:lectureId", inputValidate(updateLectureSchema), updateLecture);
 
 router.delete("/:lectureId", deleteLecture);
 

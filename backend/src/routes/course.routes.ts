@@ -14,6 +14,8 @@ import {
 } from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/upload.middleware.js";
 import sectionRouter from "./section.routes.js";
+import inputValidate from "../middlewares/inputValidate.middleware.js";
+import { createCourseSchema, updateCourseSchema } from "../schemas/course.schemas.js";
 
 const router = Router({ mergeParams: true });
 
@@ -35,6 +37,7 @@ router.post(
   "/",
   verifySession,
   authorizeRoles("admin", "instructor"),
+  inputValidate(createCourseSchema),
   createCourse,
 );
 router.patch(
@@ -42,6 +45,7 @@ router.patch(
   verifySession,
   authorizeRoles("admin", "instructor"),
   authorizeCourseAccess,
+  inputValidate(updateCourseSchema),
   updateCourse,
 );
 router.delete(

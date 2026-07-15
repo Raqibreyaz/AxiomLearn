@@ -8,6 +8,8 @@ import CourseProgress from "../models/CourseProgress.js";
 import LectureProgress from "../models/LectureProgress.js";
 import { uploadFile, deleteFile } from "../services/s3.service.js";
 import { rm } from "node:fs/promises";
+import { createCourseSchema, updateCourseSchema } from "../schemas/course.schemas.js";
+import * as z from "zod";
 
 // @desc    Get all courses
 // @route   GET /api/v1/courses
@@ -95,7 +97,10 @@ export const getCourseById = async (req: Request, res: Response) => {
 // @desc    Create a new course
 // @route   POST /api/v1/courses
 // @access  Private (Instructor/Admin)
-export const createCourse = async (req: Request, res: Response) => {
+export const createCourse = async (
+  req: Request<{}, any, z.infer<typeof createCourseSchema>>,
+  res: Response,
+) => {
   const {
     title,
     description,
@@ -110,13 +115,6 @@ export const createCourse = async (req: Request, res: Response) => {
   } = req.body;
 
   if (!req.user) throw new ApiError(401, "User must be authorized first!");
-
-  if (!title || !description || !shortDescription || !domain) {
-    throw new ApiError(
-      400,
-      "Title, description, shortDescription, and domain are required",
-    );
-  }
 
   const course = await Course.create({
     title,
@@ -140,7 +138,10 @@ export const createCourse = async (req: Request, res: Response) => {
 // @desc    Update course details
 // @route   PATCH /api/v1/courses/:id
 // @access  Private (Instructor/Admin)
-export const updateCourse = async (req: Request, res: Response) => {
+export const updateCourse = async (
+  req: Request<{ courseId: string }, any, z.infer<typeof updateCourseSchema>>,
+  res: Response,
+) => {
   const { courseId } = req.params;
   const course = req.course || (await Course.findById(courseId));
 
