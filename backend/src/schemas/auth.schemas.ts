@@ -61,3 +61,7 @@ export const updateProfileSchema = z
       path: ["password"],
     },
   );
+
+export const updateRoleSchema = z.object({
+  role: z.union([z.literal("instructor"), z.literal("student")]),
+});

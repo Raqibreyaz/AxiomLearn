@@ -12,3 +12,7 @@ export interface LectureParams extends Record<string, string> {
   sectionId: string;
   lectureId: string;
 }
+
+export interface UserParams extends Record<string, string> {
+  userId: string;
+}

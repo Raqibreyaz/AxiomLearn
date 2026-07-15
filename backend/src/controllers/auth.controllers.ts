@@ -7,8 +7,9 @@ import { createSession } from "../helpers/create-session.js";
 import { cookieOptions } from "../config/session.js";
 import { deleteFile, uploadFile } from "../services/s3.service.js";
 import { rm } from "node:fs/promises";
-import { signupSchema, loginSchema, updateProfileSchema } from "../schemas/auth.schemas.js";
+import { signupSchema, loginSchema, updateProfileSchema, updateRoleSchema } from "../schemas/auth.schemas.js";
 import * as z from "zod";
+import { UserParams } from "../types/params.js";
 
 // @desc    Register a new user
 // @route   POST /api/v1/auth/signup
@@ -220,4 +221,45 @@ export const getMe = async (req: Request, res: Response) => {
   return res
     .status(200)
     .json(new ApiResponse(200, req.user, "User details fetched successfully"));
+};
+
+export const getUsers = async (_req: Request, res: Response) => {
+  const users = await User.find().select("-password").sort({ createdAt: -1 });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, users, "Users retrieved successfully"));
+};
+
+// @desc    Update a user's role (promote/demote)
+// @route   PATCH /api/v1/auth/users/:userId/role
+// @access  Private (Admin only)
+export const updateUserRole = async (
+  req: Request<UserParams, any, z.infer<typeof updateRoleSchema>>,
+  res: Response,
+) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  // Prevent modifying an admin's role through this general promote/demote route
+  if (user.role === "admin") {
+    throw new ApiError(400, "Cannot change the role of an administrative user");
+  }
+
+  user.role = role;
+  await user.save();
+
+  // Exclude password from the returned object
+  const updatedUser = user.toObject();
+  delete updatedUser["password"];
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUser, `User role updated to ${role} successfully`));
 };
